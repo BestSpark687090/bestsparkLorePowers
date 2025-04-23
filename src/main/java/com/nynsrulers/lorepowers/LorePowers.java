@@ -33,6 +33,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(this, this);
         CoreTools.getInstance().setPlugin(this);
         getCommand("lorepowers").setExecutor(new ManageCMD(this));
+        getCommand("lorepowers").setTabCompleter(new ManageTabCompleter());
         CoreTools.getInstance().checkForUpdates();
     }
 
