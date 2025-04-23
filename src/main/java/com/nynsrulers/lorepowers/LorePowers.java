@@ -4,6 +4,7 @@ import de.tr7zw.nbtapi.NBT;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.Boat;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -15,6 +16,7 @@ import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -37,6 +39,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
         CoreTools.getInstance().setPlugin(this);
         getCommand("lorepowers").setExecutor(new ManageCMD(this));
         getCommand("lorepowers").setTabCompleter(new ManageTabCompleter());
+        getCommand("dragonform").setExecutor(new DragonFormCMD(this));
         CoreTools.getInstance().checkForUpdates();
     }
 
@@ -170,13 +173,23 @@ public final class LorePowers extends JavaPlugin implements Listener {
     @EventHandler
     public void onJoin_SpeedMine(PlayerJoinEvent e) {
         if (checkPower(e.getPlayer().getUniqueId(), Power.SPEED_MINE)) {
-            e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 1, true, true, true));
+            e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 2, true, true, true));
         }
     }
     @EventHandler
     public void onConsume_SpeedMine(PlayerItemConsumeEvent e) {
         if (e.getItem().getType() == Material.MILK_BUCKET && checkPower(e.getPlayer().getUniqueId(), Power.SPEED_MINE)) {
-            e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 1, true, true, true));
+            e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 2, true, true, true));
+        }
+    }
+    @EventHandler
+    public void onBoat_SpeedMine(VehicleEnterEvent e) {
+        if (e.getVehicle() instanceof Boat && e.getEntered() instanceof Player) {
+            if (checkPower(((Player) e.getEntered()).getUniqueId(), Power.SPEED_MINE)) {
+                e.setCancelled(true);
+                e.getEntered().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You cannot ride in boats, as your arms too strong!");
+                e.getVehicle().remove();
+            }
         }
     }
 
