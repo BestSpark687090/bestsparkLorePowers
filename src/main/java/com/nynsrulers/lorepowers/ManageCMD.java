@@ -108,6 +108,17 @@ public class ManageCMD implements CommandExecutor {
             sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "Removed " + powerToRemove.getName() + " from " + plugin.getServer().getOfflinePlayer(playerToRemove).getName() + ".");
             return true;
         }
+        if (args[0].equalsIgnoreCase("forcecallback")) {
+            UUID playerToForce;
+            if (args.length == 1 && sender instanceof Player) {
+                playerToForce = ((Player) sender).getUniqueId();
+            } else {
+                playerToForce = plugin.getServer().getOfflinePlayer(args[1]).getUniqueId();
+            }
+            plugin.powerEditCallback(playerToForce);
+            sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "Forced power edit callback for " + plugin.getServer().getOfflinePlayer(playerToForce).getName() + ".");
+            return true;
+        }
         sendHelpMessage(sender);
         return false;
     }
@@ -117,6 +128,7 @@ public class ManageCMD implements CommandExecutor {
         sender.sendMessage(ChatColor.AQUA + "/lorepowers list [player]: List the powers of a player.");
         sender.sendMessage(ChatColor.AQUA + "/lorepowers add <power> [player]: Add a power to a player.");
         sender.sendMessage(ChatColor.AQUA + "/lorepowers remove <power> [player]: Remove a power from a player.");
+        sender.sendMessage(ChatColor.AQUA + "/lorepowers forcecallback [player]: Force the power edit callback for a player.");
     }
     private List<String> getPowers(UUID playerToCheck) {
         return plugin.getConfig().getStringList("PowerLinks." + playerToCheck.toString());
