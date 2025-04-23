@@ -14,6 +14,7 @@ public enum Power {
     PIGLIN_AVIAN_TRAITS("Piglin-Avian Traits", "Grants the player increased speed, agility, and strength."),
     HEAT_RESISTANCE("Heat Resistance", "Grants the player immunity to fire and magma damage (but not lava)."),
     PIGLIN_AID("Piglin Aid", "Piglins and Piglin Brutes will aggro any attackers to the player and won't attack the player."),
+    ANKLE_BITER("Ankle Biter", "Punches dealt by the player have a 10% chance to snap tha ankles of the victim, immobilizing them temporarily."),
     // XxDeathFlamexX's powers (not all of these will be implemented, as I was given an excessive number of powers):
     FIRE_BREATH("Fire Breath", "Allows the player to breathe fire, dealing damage to enemies in front of them."),
     SHADOW_VANISH("Shadow Vanish", "Allows the player to become invisible for a short period of time."),
