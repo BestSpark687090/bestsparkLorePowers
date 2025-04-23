@@ -8,6 +8,7 @@ description: A plugin that adds the powers from the NYNS lore.
 website: https://github.com/nynsrulers/lorepowers
 depend:
   - NBTAPI
+  - LibsDisguises
 commands:
   lorepowers:
     description: The plugin's main management command.

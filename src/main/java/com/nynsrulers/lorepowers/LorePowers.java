@@ -27,6 +27,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 public final class LorePowers extends JavaPlugin implements Listener {
+    public List<UUID> dragonFormActive = new ArrayList<>();
+    
     @Override
     public void onEnable() {
         getConfig().options().copyDefaults();

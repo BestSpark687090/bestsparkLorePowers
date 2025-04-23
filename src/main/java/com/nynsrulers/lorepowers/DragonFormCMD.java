@@ -3,11 +3,14 @@ package com.nynsrulers.lorepowers;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Player;
 
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.LibsDisguises;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.DisguiseType;
+import me.libraryaddict.disguise.disguisetypes.MobDisguise;
 import net.md_5.bungee.api.ChatColor;
 
 public class DragonFormCMD implements CommandExecutor {
@@ -21,14 +24,24 @@ public class DragonFormCMD implements CommandExecutor {
       sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "This command can only be used by players.");
       return false;
     }
-    if (plugin.checkPower(((Player) sender).getUniqueId(), Power.DRAGON_FORM)) {
+    Player player = (Player) sender;
+    if (plugin.checkPower(player.getUniqueId(), Power.DRAGON_FORM)) {
       sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You do not have this power!.");
+      if (plugin.dragonFormActive.contains(player.getUniqueId())) {
+        plugin.dragonFormActive.remove(player.getUniqueId());
+        DisguiseAPI.undisguiseToAll(player);
+      }
       return false;
     }
-    DisguiseAPI.disguiseEntity(((Player) sender), getDragonDisguise());
+    if (plugin.dragonFormActive.contains(player.getUniqueId())) {
+      plugin.dragonFormActive.remove(player.getUniqueId());
+      DisguiseAPI.undisguiseToAll(player);
+      sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You have returned to a human form!");
+      return true;
+    }
+    DisguiseAPI.disguiseEntity(player, new MobDisguise(DisguiseType.ENDER_DRAGON));
+    plugin.dragonFormActive.add(player.getUniqueId());
+    sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You have transformed into a Dragon form!");
     return true;
-  }
-  private Disguise getDragonDisguise() {
-    return null; // in dev
   }
 }
