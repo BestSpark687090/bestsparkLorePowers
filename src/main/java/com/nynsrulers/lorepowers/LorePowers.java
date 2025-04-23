@@ -197,6 +197,9 @@ public final class LorePowers extends JavaPlugin implements Listener {
         reloadConfig();
         CoreTools.getInstance().setPlugin(this);
         CoreTools.getInstance().checkForUpdates();
+        for (Player player : getServer().getOnlinePlayers()) {
+            powerEditCallback(player.getUniqueId());
+        }
     }
 
     public void powerEditCallback(UUID playerUUID) {
