@@ -20,7 +20,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.projectiles.ProjectileSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -135,7 +134,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
     @EventHandler
     public void onPearlThrow_NightPearls(ProjectileLaunchEvent e) {
         if (e.isCancelled()) return;
-        ItemStack nightPearl = new ItemCreator(this).createNightPearl();
+        ItemStack nightPearl = ItemCreator.createNightPearl();
         if (!(e.getEntity().getShooter() instanceof Player player)) return;
         if (player.getItemInUse() == null) return;
         if (e.getEntity() instanceof EnderPearl && player.getItemInUse().isSimilar(nightPearl)) {
@@ -212,7 +211,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
         }
 
         if (checkPower(playerUUID, Power.NIGHT_PEARLS)) {
-            ItemStack nightPearl = new ItemCreator(this).createNightPearl();
+            ItemStack nightPearl = ItemCreator.createNightPearl();
             if (player != null) {
                 player.getInventory().addItem(nightPearl);
                 player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have been given a Night Pearl!");

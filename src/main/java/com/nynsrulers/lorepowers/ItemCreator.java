@@ -1,7 +1,6 @@
 package com.nynsrulers.lorepowers;
 
 import de.tr7zw.nbtapi.NBT;
-import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -13,11 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ItemCreator {
-    private final LorePowers plugin;
-    public ItemCreator(LorePowers plugin) {
-        this.plugin = plugin;
-    }
-    public ItemStack createNightPearl() {
+    public static ItemStack createNightPearl() {
         ItemStack pearl = new ItemStack(Material.ENDER_PEARL);
         NBT.modify(pearl, nbt -> {
             nbt.setBoolean("LorePowers_NightPearl", true);
@@ -31,7 +26,7 @@ public class ItemCreator {
         pearl.setItemMeta(pearlMeta);
         return pearl;
     }
-    private List<String> nightPearlLore() {
+    private static List<String> nightPearlLore() {
         List<String> lore = new ArrayList<>();
         lore.add("");
         lore.add(ChatColor.DARK_AQUA + "An infinite ender pearl with no cooldown.");
