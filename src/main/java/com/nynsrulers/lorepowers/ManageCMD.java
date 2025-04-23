@@ -75,6 +75,7 @@ public class ManageCMD implements CommandExecutor {
             plugin.reloadConfig();
             plugin.getConfig().set("PowerLinks." + playerToAdd.toString(), powers);
             plugin.saveConfig();
+            plugin.powerEditCallback(playerToAdd);
             sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "Added " + powerToAdd.getName() + " to " + plugin.getServer().getOfflinePlayer(playerToAdd).getName() + ".");
             return true;
         }
@@ -105,6 +106,7 @@ public class ManageCMD implements CommandExecutor {
             plugin.reloadConfig();
             plugin.getConfig().set("PowerLinks." + playerToRemove.toString(), powers);
             plugin.saveConfig();
+            plugin.powerEditCallback(playerToRemove);
             sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "Removed " + powerToRemove.getName() + " from " + plugin.getServer().getOfflinePlayer(playerToRemove).getName() + ".");
             return true;
         }

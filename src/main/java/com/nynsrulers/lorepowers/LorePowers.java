@@ -13,6 +13,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -164,6 +166,19 @@ public final class LorePowers extends JavaPlugin implements Listener {
         }
     }
 
+    @EventHandler
+    public void onJoin_SpeedMine(PlayerJoinEvent e) {
+        if (checkPower(e.getPlayer().getUniqueId(), Power.SPEED_MINE)) {
+            e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 1, true, true, true));
+        }
+    }
+    @EventHandler
+    public void onConsume_SpeedMine(PlayerItemConsumeEvent e) {
+        if (e.getItem().getType() == Material.MILK_BUCKET && checkPower(e.getPlayer().getUniqueId(), Power.SPEED_MINE)) {
+            e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 1, true, true, true));
+        }
+    }
+
     void reloadPlugin() {
         reloadConfig();
         CoreTools.getInstance().setPlugin(this);
@@ -201,6 +216,12 @@ public final class LorePowers extends JavaPlugin implements Listener {
             if (player != null) {
                 player.getInventory().addItem(nightPearl);
                 player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have been given a Night Pearl!");
+            }
+        }
+        if (checkPower(playerUUID, Power.SPEED_MINE)) {
+            if (player != null) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 1, true, true, true));
+                player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have been given Speed Mine (Haste 2)!");
             }
         }
     }

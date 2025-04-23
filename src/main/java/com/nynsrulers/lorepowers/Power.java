@@ -2,8 +2,8 @@ package com.nynsrulers.lorepowers;
 
 public enum Power {
     VOID_TOTEMS("Void Totems", "Gives the player the ability to bypass totems on kill."), // Aelithron's power
-    HASTE_2_INF("Haste 2", "Gives the player infinite Haste 2."), // Dndmastr's power
-    PERMANENT_ELYTRA("Permanent Elytra", "Gives the player a permanent, soulbound elytra."), // Exotic Butterfly's power
+    SPEED_MINE("Speed Mine", "Gives the player infinite Haste 2."), // Dndmastr's power
+    PERMANENT_ELYTRA("Permanent Elytra", "Gives the player a permanent, soulbound elytra."), // Exotic Butterfly's power, not used here (used in Nexo) but is listed here for the list command.
     GLITCHED_PRESENCE("Glitched Presence", "Only allows the player to be attacked by swords."), // Oli7211's power
     DRAGON_FORM("Dragon Form", "Allows the player to transform into a powerful dragon."), // Power shared between SlothDragon and XxDeathFlamexX.
     DRAGON_FORM_CARNAGE("Dragon Form Carnage", "Allows the player to destroy a large area while in Dragon Form."), // SlothDragon's power
