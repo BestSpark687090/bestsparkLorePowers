@@ -1,7 +1,12 @@
 package com.nynsrulers.lorepowers;
 
-import de.tr7zw.nbtapi.NBT;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Boat;
@@ -14,19 +19,18 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import de.tr7zw.nbtapi.NBT;
 
 public final class LorePowers extends JavaPlugin implements Listener {
     public List<UUID> dragonFormActive = new ArrayList<>();
@@ -136,6 +140,26 @@ public final class LorePowers extends JavaPlugin implements Listener {
             }
         }
     }
+    @EventHandler
+    public void onDrop_MapWarp(PlayerDropItemEvent e) {
+        if (e.isCancelled()) return;
+        if ((e.getItemDrop() == null) || (e.getItemDrop().getItemStack() == null)) return;
+        if (e.getItemDrop().getItemStack().getType() != Material.FILLED_MAP) return;
+        MapMeta mapMeta = (MapMeta) e.getItemDrop().getItemStack().getItemMeta();
+        if (mapMeta == null) return;
+        if (checkPower(e.getPlayer().getUniqueId(), Power.MAP_WARP)) {
+            if (mapMeta.getMapView().getWorld().getEnvironment() == World.Environment.NETHER) {
+                e.getPlayer().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You cannot use this in the Nether!");
+                return;
+            }
+            Location tpLocation = new Location(mapMeta.getMapView().getWorld(), mapMeta.getMapView().getCenterX(), 0, mapMeta.getMapView().getCenterZ());
+            tpLocation.setY(tpLocation.getWorld().getHighestBlockYAt(tpLocation));
+            e.getPlayer().teleport(tpLocation);
+            e.getPlayer().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have been warped to the map's center!");
+            e.setCancelled(true);
+        }
+    }
+
     @EventHandler
     public void onPearlThrow_NightPearls(ProjectileLaunchEvent e) {
         if (e.isCancelled()) return;
