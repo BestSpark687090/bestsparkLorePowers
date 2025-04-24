@@ -13,10 +13,12 @@ import org.bukkit.damage.DamageType;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
@@ -102,6 +104,27 @@ public final class LorePowers extends JavaPlugin implements Listener {
                     (weapon.toString().endsWith("_AXE") && e.getDamage() > 9)) {
                 e.setCancelled(true);
                 lastCause.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You cannot attack with this, as you are too weak!");
+            }
+        }
+    }
+    @EventHandler
+    public void onToolUse_MapWarp(PlayerInteractEvent e) {
+        if (e.useInteractedBlock() == Result.DENY || e.useItemInHand() == Result.DENY) return;
+        Entity lastCause = e.getPlayer();
+        if (lastCause instanceof Player && checkPower(lastCause.getUniqueId(), Power.MAP_WARP)) {
+            Material tool = ((Player) lastCause).getInventory().getItemInMainHand().getType();
+            Material tool2 = ((Player) lastCause).getInventory().getItemInOffHand().getType();
+            if (tool.toString().startsWith("NETHERITE_") ||
+                    tool.toString().startsWith("DIAMOND_") ||
+                    tool.toString().startsWith("GOLDEN_") ||
+                    tool.toString().startsWith("IRON_") ||
+                    tool2.toString().startsWith("NETHERITE_") ||
+                    tool2.toString().startsWith("DIAMOND_") ||
+                    tool2.toString().startsWith("GOLDEN_") ||
+                    tool2.toString().startsWith("IRON_")
+            ) {
+                e.setCancelled(true);
+                lastCause.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You cannot use this tool, as you are too weak!");
             }
         }
     }
