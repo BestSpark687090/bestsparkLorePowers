@@ -6,14 +6,14 @@ import java.util.Objects;
 import java.util.UUID;
 
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
+import org.bukkit.damage.DamageSource;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityResurrectEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -27,7 +27,7 @@ import org.bukkit.potion.PotionEffectType;
 
 public final class LorePowers extends JavaPlugin implements Listener {
     public List<UUID> dragonFormActive = new ArrayList<>();
-    
+
     @Override
     public void onEnable() {
         getConfig().options().copyDefaults();
@@ -105,34 +105,36 @@ public final class LorePowers extends JavaPlugin implements Listener {
             }
         }
     }
+
     @EventHandler
     public void onHurt_MapWarp(EntityDamageEvent e) {
         if (e.isCancelled()) return;
         Entity hurtEntity = e.getEntity();
         if (hurtEntity instanceof Player) {
             if (checkPower(hurtEntity.getUniqueId(), Power.MAP_WARP)) {
-               EntityEquipment equipment = ((Player) hurtEntity).getEquipment();
-               if (equipment == null) return;
-               boolean isWearingTooStrongArmor = false;
-               for (ItemStack armor : equipment.getArmorContents()) {
-                   if (armor.getType().toString().startsWith("DIAMOND_") ||
-                           armor.getType().toString().startsWith("NETHERITE_") ||
-                           armor.getType().toString().startsWith("GOLDEN_") ||
-                           armor.getType().toString().startsWith("IRON_") ||
-                           armor.getType().toString().startsWith("CHAINMAIL_")) {
-                          isWearingTooStrongArmor = true;
-                   }
-               }
-               if (isWearingTooStrongArmor) {
-                   hurtEntity.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You cannot wear this armor, as you are too weak!");
-                   for (ItemStack armor : equipment.getArmorContents()) {
-                       hurtEntity.getWorld().dropItem(hurtEntity.getLocation(), armor);
-                   }
-                   equipment.setArmorContents(new ItemStack[]{});
-               }
+                EntityEquipment equipment = ((Player) hurtEntity).getEquipment();
+                if (equipment == null) return;
+                boolean isWearingTooStrongArmor = false;
+                for (ItemStack armor : equipment.getArmorContents()) {
+                    if (armor.getType().toString().startsWith("DIAMOND_") ||
+                            armor.getType().toString().startsWith("NETHERITE_") ||
+                            armor.getType().toString().startsWith("GOLDEN_") ||
+                            armor.getType().toString().startsWith("IRON_") ||
+                            armor.getType().toString().startsWith("CHAINMAIL_")) {
+                        isWearingTooStrongArmor = true;
+                    }
+                }
+                if (isWearingTooStrongArmor) {
+                    hurtEntity.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You cannot wear this armor, as you are too weak!");
+                    for (ItemStack armor : equipment.getArmorContents()) {
+                        hurtEntity.getWorld().dropItem(hurtEntity.getLocation(), armor);
+                    }
+                    equipment.setArmorContents(new ItemStack[]{});
+                }
             }
         }
     }
+
     @EventHandler
     public void onDrop_MapWarp(PlayerDropItemEvent e) {
         if (e.isCancelled()) return;
@@ -177,12 +179,14 @@ public final class LorePowers extends JavaPlugin implements Listener {
             e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 2, true, true, true));
         }
     }
+
     @EventHandler
     public void onConsume_SpeedMine(PlayerItemConsumeEvent e) {
         if (e.getItem().getType() == Material.MILK_BUCKET && checkPower(e.getPlayer().getUniqueId(), Power.SPEED_MINE)) {
             getServer().getScheduler().scheduleSyncDelayedTask(this, () -> e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 2, true, true, true)), 20L);
         }
     }
+
     @EventHandler
     public void onBoat_SpeedMine(VehicleEnterEvent e) {
         if (e.getVehicle() instanceof Boat && e.getEntered() instanceof Player) {
@@ -204,6 +208,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
             player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, Integer.MAX_VALUE, 0, true, true, true));
         }
     }
+
     @EventHandler
     public void onConsume_PiglinAvianTraits(PlayerItemConsumeEvent e) {
         if (e.getItem().getType() == Material.MILK_BUCKET && checkPower(e.getPlayer().getUniqueId(), Power.PIGLIN_AVIAN_TRAITS)) {
@@ -213,6 +218,79 @@ public final class LorePowers extends JavaPlugin implements Listener {
                 e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, Integer.MAX_VALUE, 0, true, true, true));
                 e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, Integer.MAX_VALUE, 0, true, true, true));
             }, 20L);
+        }
+    }
+
+    @EventHandler
+    public void onHit_PiglinAvianTraits(EntityDamageByEntityEvent e) {
+        if (e.isCancelled()) return;
+        if (e.getEntity() instanceof Player && checkPower(e.getEntity().getUniqueId(), Power.PIGLIN_AVIAN_TRAITS)) {
+            Entity lastCause = e.getDamager();
+            if (lastCause instanceof Player) {
+                if (((Player) lastCause).getInventory().getItemInMainHand().getType().toString().endsWith("_AXE")) {
+                    e.setDamage(e.getDamage() * 1.5);
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onDamage_HeatResistance(EntityDamageEvent e) {
+        if (e.isCancelled()) return;
+        if (e.getEntity() instanceof Player && checkPower(e.getEntity().getUniqueId(), Power.HEAT_RESISTANCE)) {
+            if (e.getCause() == EntityDamageEvent.DamageCause.FIRE ||
+                    e.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK ||
+                    e.getCause() == EntityDamageEvent.DamageCause.HOT_FLOOR) {
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onDamage_PiglinAid(EntityDamageEvent e) {
+        if (e.isCancelled()) return;
+        if (e.getEntity() instanceof Player && checkPower(e.getEntity().getUniqueId(), Power.PIGLIN_AID)) {
+            for (Entity entity : e.getEntity().getNearbyEntities(10, 10, 10)) {
+                if (entity instanceof PiglinAbstract) {
+                    try {
+                        ((PiglinAbstract) entity).setTarget((LivingEntity) e.getDamageSource().getCausingEntity());
+                    } catch (ClassCastException ignored) {
+                    }
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onPiglinDeath_PiglinAid(EntityDeathEvent e) {
+        if (e.getEntity() instanceof PiglinAbstract) {
+            for (Entity entity : e.getEntity().getNearbyEntities(10, 10, 10)) {
+                if (entity instanceof Player) {
+                    if (checkPower(entity.getUniqueId(), Power.PIGLIN_AID)) {
+                        entity.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "A piglin has died near you!");
+                        ((Player) entity).addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 400, 1, true, true, true));
+                        ((Player) entity).damage(5);
+                    }
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onAttack_AnkleBiter(EntityDamageByEntityEvent e) {
+        if (e.isCancelled()) return;
+        if (e.getDamager() instanceof Player player && checkPower(e.getDamager().getUniqueId(), Power.ANKLE_BITER)) {
+            if (player.getInventory().getItemInMainHand().getType() == Material.AIR && Math.random() < 0.1) {
+                ((LivingEntity) e.getEntity()).addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 200, 9, true, true, true));
+                e.getEntity().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "Your ankles have been bitten by " + e.getDamager().getName() + ChatColor.RED + ", so you are immobilized!");
+                e.getDamager().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You have bitten the ankles of " + e.getEntity().getName() + ChatColor.GREEN + "!");
+            }
+        }
+    }
+    @EventHandler
+    public void onJoin_AnkleBiter(PlayerJoinEvent e) {
+        if (checkPower(e.getPlayer().getUniqueId(), Power.ANKLE_BITER)) {
+            e.getPlayer().getAttribute(Attribute.SCALE).setBaseValue(0.75);
         }
     }
 
@@ -265,13 +343,20 @@ public final class LorePowers extends JavaPlugin implements Listener {
                         player.hasPotionEffect(PotionEffectType.SLOW_FALLING) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.SLOW_FALLING)).getAmplifier() == 0 &&
                         player.hasPotionEffect(PotionEffectType.STRENGTH) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.STRENGTH)).getAmplifier() == 0;
 
-                if (!hasAllEffects) {
+                if (hasAllEffects) {
                     player.removePotionEffect(PotionEffectType.SPEED);
                     player.removePotionEffect(PotionEffectType.JUMP_BOOST);
                     player.removePotionEffect(PotionEffectType.SLOW_FALLING);
                     player.removePotionEffect(PotionEffectType.STRENGTH);
                     player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have lost your Piglin and Avian traits!");
                 }
+            }
+        }
+        if (player != null) {
+            if (checkPower(playerUUID, Power.ANKLE_BITER)) {
+                player.getAttribute(Attribute.SCALE).setBaseValue(0.75);
+            } else {
+                player.getAttribute(Attribute.SCALE).setBaseValue(1.0);
             }
         }
     }
