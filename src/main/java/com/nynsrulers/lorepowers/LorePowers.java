@@ -5,14 +5,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.entity.Boat;
-import org.bukkit.entity.EnderPearl;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -29,8 +24,6 @@ import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-
-import de.tr7zw.nbtapi.NBT;
 
 public final class LorePowers extends JavaPlugin implements Listener {
     public List<UUID> dragonFormActive = new ArrayList<>();
@@ -143,7 +136,6 @@ public final class LorePowers extends JavaPlugin implements Listener {
     @EventHandler
     public void onDrop_MapWarp(PlayerDropItemEvent e) {
         if (e.isCancelled()) return;
-        if ((e.getItemDrop() == null) || (e.getItemDrop().getItemStack() == null)) return;
         if (e.getItemDrop().getItemStack().getType() != Material.FILLED_MAP) return;
         MapMeta mapMeta = (MapMeta) e.getItemDrop().getItemStack().getItemMeta();
         if (mapMeta == null) return;
@@ -163,34 +155,19 @@ public final class LorePowers extends JavaPlugin implements Listener {
     @EventHandler
     public void onPearlThrow_NightPearls(ProjectileLaunchEvent e) {
         if (e.isCancelled()) return;
-        ItemStack nightPearl = ItemCreator.createNightPearl();
         if (!(e.getEntity().getShooter() instanceof Player player)) return;
-        if (player.getItemInUse() == null) return;
-        if (e.getEntity() instanceof EnderPearl && player.getItemInUse().isSimilar(nightPearl)) {
-            if (!checkPower(player.getUniqueId(), Power.NIGHT_PEARLS)) {
-                player.getInventory().remove(nightPearl);
+        if (!checkPower(player.getUniqueId(), Power.NIGHT_PEARLS)) return;
+        if (e.getEntityType() == EntityType.ENDER_PEARL && player.getInventory().getItemInMainHand().getType() == Material.ENDER_PEARL) {
+            if (player.getWorld().getEnvironment() != World.Environment.NORMAL) return;
+            if (player.getWorld().getGameTime() % 24000 >= 13000) return;
+            Block locToTP = player.getTargetBlockExact(40, FluidCollisionMode.NEVER);
+            if (locToTP != null) {
                 e.setCancelled(true);
-                return;
+                player.teleport(locToTP.getLocation());
+            } else {
+                e.setCancelled(false);
+                e.getEntity().setVelocity(player.getLocation().getDirection().multiply(3));
             }
-            if (player.getWorld().getEnvironment() != World.Environment.NORMAL) {
-                player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You can only use this in the overworld!");
-                e.setCancelled(true);
-                return;
-            }
-            if (player.getWorld().getGameTime() % 24000 > 13000) {
-                player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You can only use this at night!");
-                e.setCancelled(true);
-                return;
-            }
-            player.setCooldown(Material.ENDER_PEARL, 0);
-            try {
-                player.teleport(Objects.requireNonNull(player.getTargetBlockExact(40)).getLocation());
-            } catch (NullPointerException ex) {
-                player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You cannot teleport to that location!");
-                e.setCancelled(true);
-                return;
-            }
-            e.setCancelled(true);
         }
     }
 
@@ -203,7 +180,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
     @EventHandler
     public void onConsume_SpeedMine(PlayerItemConsumeEvent e) {
         if (e.getItem().getType() == Material.MILK_BUCKET && checkPower(e.getPlayer().getUniqueId(), Power.SPEED_MINE)) {
-            e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 2, true, true, true));
+            getServer().getScheduler().scheduleSyncDelayedTask(this, () -> e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 2, true, true, true)), 20L);
         }
     }
     @EventHandler
@@ -214,6 +191,28 @@ public final class LorePowers extends JavaPlugin implements Listener {
                 e.getEntered().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You cannot ride in boats, as your arms too strong!");
                 e.getVehicle().remove();
             }
+        }
+    }
+
+    @EventHandler
+    public void onJoin_PiglinAvianTraits(PlayerJoinEvent e) {
+        Player player = e.getPlayer();
+        if (checkPower(player.getUniqueId(), Power.PIGLIN_AVIAN_TRAITS)) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 1, true, true, true));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 1, true, true, true));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, Integer.MAX_VALUE, 0, true, true, true));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, Integer.MAX_VALUE, 0, true, true, true));
+        }
+    }
+    @EventHandler
+    public void onConsume_PiglinAvianTraits(PlayerItemConsumeEvent e) {
+        if (e.getItem().getType() == Material.MILK_BUCKET && checkPower(e.getPlayer().getUniqueId(), Power.PIGLIN_AVIAN_TRAITS)) {
+            getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
+                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 1, true, true, true));
+                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 1, true, true, true));
+                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, Integer.MAX_VALUE, 0, true, true, true));
+                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, Integer.MAX_VALUE, 0, true, true, true));
+            }, 20L);
         }
     }
 
@@ -236,33 +235,43 @@ public final class LorePowers extends JavaPlugin implements Listener {
             }
         }
         if (playerPowers.isEmpty()) {
-           return;
+            return;
         }
         Player player = getServer().getPlayer(playerUUID);
 
-        // we need to remove custom items before giving new copies (if player is online ofc)
-        if (player != null) {
-            for (ItemStack item : player.getInventory()) {
-                NBT.get(item, nbt -> {
-                    boolean isNightPearl = nbt.getBoolean("LorePowers_NightPearl");
-                    if (isNightPearl) {
-                        player.getInventory().remove(item);
-                    }
-                });
-            }
-        }
-
-        if (checkPower(playerUUID, Power.NIGHT_PEARLS)) {
-            ItemStack nightPearl = ItemCreator.createNightPearl();
-            if (player != null) {
-                player.getInventory().addItem(nightPearl);
-                player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have been given a Night Pearl!");
-            }
-        }
         if (checkPower(playerUUID, Power.SPEED_MINE)) {
             if (player != null) {
-                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 1, true, true, true));
-                player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have been given Speed Mine (Haste 2)!");
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 2, true, true, true));
+                player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have been given Speed Mine (Haste 3)!");
+            }
+        } else {
+            if (player != null && player.hasPotionEffect(PotionEffectType.HASTE) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.HASTE)).getAmplifier() == 2) {
+                player.removePotionEffect(PotionEffectType.HASTE);
+                player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have lost Speed Mine (Haste 3)!");
+            }
+        }
+        if (checkPower(playerUUID, Power.PIGLIN_AVIAN_TRAITS)) {
+            if (player != null) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 1, true, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 1, true, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, Integer.MAX_VALUE, 0, true, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, Integer.MAX_VALUE, 0, true, true, true));
+                player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have been given your Piglin and Avian traits!");
+            }
+        } else {
+            if (player != null) {
+                boolean hasAllEffects = player.hasPotionEffect(PotionEffectType.SPEED) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.SPEED)).getAmplifier() == 1 &&
+                        player.hasPotionEffect(PotionEffectType.JUMP_BOOST) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.JUMP_BOOST)).getAmplifier() == 1 &&
+                        player.hasPotionEffect(PotionEffectType.SLOW_FALLING) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.SLOW_FALLING)).getAmplifier() == 0 &&
+                        player.hasPotionEffect(PotionEffectType.STRENGTH) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.STRENGTH)).getAmplifier() == 0;
+
+                if (!hasAllEffects) {
+                    player.removePotionEffect(PotionEffectType.SPEED);
+                    player.removePotionEffect(PotionEffectType.JUMP_BOOST);
+                    player.removePotionEffect(PotionEffectType.SLOW_FALLING);
+                    player.removePotionEffect(PotionEffectType.STRENGTH);
+                    player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have lost your Piglin and Avian traits!");
+                }
             }
         }
     }

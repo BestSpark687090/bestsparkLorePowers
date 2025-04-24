@@ -17,10 +17,6 @@ repositories {
         url = "https://oss.sonatype.org/content/groups/public/"
     }
     maven {
-        name = "CodeMC"
-        url = uri("https://repo.codemc.io/repository/maven-public/")
-    }
-    maven {
         name = "md_5"
         url "https://repo.md-5.net/content/groups/public/"
     }
@@ -28,7 +24,6 @@ repositories {
 
 dependencies {
     compileOnly("org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT")
-    compileOnly("de.tr7zw:item-nbt-api-plugin:2.15.0")
     implementation(group: 'me.libraryaddict.disguises', name: 'libsdisguises', version: '11.0.0')
 }
 
