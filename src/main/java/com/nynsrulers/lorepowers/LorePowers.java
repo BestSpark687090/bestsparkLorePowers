@@ -339,6 +339,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
         if (!(e.getDamager() instanceof Player player)) return;
         if (player.isSneaking()) {
             player.setFireTicks(100);
+            player.damage(3);
             Location playerLocation = player.getLocation();
             Vector direction = playerLocation.getDirection().normalize();
             for (int i = 1; i <= 5; i++) {
