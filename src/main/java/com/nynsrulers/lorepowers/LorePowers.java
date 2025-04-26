@@ -1,9 +1,6 @@
 package com.nynsrulers.lorepowers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -24,6 +21,7 @@ import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 
 public final class LorePowers extends JavaPlugin implements Listener {
     public List<UUID> dragonFormActive = new ArrayList<>();
@@ -331,6 +329,27 @@ public final class LorePowers extends JavaPlugin implements Listener {
     public void onJoin_AnkleBiter(PlayerJoinEvent e) {
         if (checkPower(e.getPlayer().getUniqueId(), Power.ANKLE_BITER)) {
             e.getPlayer().getAttribute(Attribute.SCALE).setBaseValue(0.75);
+        }
+    }
+
+    @EventHandler
+    public void onDamage_FireBreath(EntityDamageByEntityEvent e) {
+        if (e.isCancelled()) return;
+        if (!checkPower(e.getDamager().getUniqueId(), Power.FIRE_BREATH)) return;
+        if (!(e.getDamager() instanceof Player player)) return;
+        if (player.isSneaking()) {
+            player.setFireTicks(100);
+            Location playerLocation = player.getLocation();
+            Vector direction = playerLocation.getDirection().normalize();
+            for (int i = 1; i <= 5; i++) {
+                Location checkLocation = playerLocation.clone().add(direction.clone().multiply(i));
+                player.getWorld().spawnParticle(Particle.FLAME, checkLocation, 10, 0.2, 0.2, 0.2, 0.01);
+                for (Entity entity : player.getWorld().getNearbyEntities(checkLocation, 1, 1, 1)) {
+                    if (entity instanceof LivingEntity && !entity.equals(player)) {
+                        entity.setFireTicks(100);
+                    }
+                }
+            }
         }
     }
 
