@@ -10,10 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.entity.*;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
@@ -69,20 +66,46 @@ public final class LorePowers extends JavaPlugin implements Listener {
     }
 
     @EventHandler
+    public void onJoin_BeeFlight(PlayerJoinEvent e) {
+        if (checkPower(e.getPlayer().getUniqueId(), Power.BEE_FLIGHT)) {
+            e.getPlayer().setAllowFlight(true);
+            e.getPlayer().setFlying(true);
+            e.getPlayer().getAttribute(Attribute.SCALE).setBaseValue(0.5);
+            e.getPlayer().getAttribute(Attribute.MAX_HEALTH).setBaseValue(16);
+        }
+    }
+    @EventHandler
+    public void onAttack_BeeFlight(EntityDamageByEntityEvent e) {
+        if (e.isCancelled()) return;
+        if (e.getDamager() instanceof Player player && checkPower(e.getDamager().getUniqueId(), Power.BEE_FLIGHT)) {
+            if (player.getInventory().getItemInMainHand().getType().toString().endsWith("_SWORD") && Math.random() < 0.1) {
+                ((LivingEntity) e.getEntity()).addPotionEffect(new PotionEffect(PotionEffectType.POISON, 200, 1, true, true, true));
+                ((Player) e.getDamager()).damage(2);
+                e.getEntity().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have been stung by " + e.getDamager().getName() + ChatColor.RED + "!");
+                e.getDamager().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You stung " + e.getEntity().getName() + ChatColor.GREEN + "!");
+            }
+
+        }
+    }
+    @EventHandler
+    public void onDamage_BeeFlight(EntityDamageEvent e) {
+        if (e.isCancelled()) return;
+        if (e.getEntity() instanceof Player && checkPower(e.getEntity().getUniqueId(), Power.BEE_FLIGHT)) {
+            ((Player) e.getEntity()).setFlying(false);
+        }
+    }
+
+    @EventHandler
     public void onAttack_GlitchedPresence(EntityDamageByEntityEvent e) {
         if (e.isCancelled()) return;
         if (e.getEntity() instanceof Player && checkPower(e.getEntity().getUniqueId(), Power.GLITCHED_PRESENCE)) {
             Entity lastCause = e.getDamager();
             if (lastCause instanceof Player) {
                 if (!((Player) lastCause).getInventory().getItemInMainHand().getType().toString().endsWith("_SWORD")) {
-                    lastCause.teleport(lastCause.getWorld().getHighestBlockAt(
-                            lastCause.getLocation().add(
-                                    (Math.random() - 0.5) * 200, 0, (Math.random() - 0.5) * 200
-                            ).getBlockX(),
-                            lastCause.getLocation().getBlockZ()
-                    ).getLocation().add(0.5, 1, 0.5));
+                    ((Player) lastCause).damage(e.getDamage(), e.getEntity());
+                    e.setDamage(0);
                     lastCause.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You were glitched by " + e.getEntity().getName() + "'s presence!");
-                    e.getEntity().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You glitched " + lastCause.getName() + "'s presence!");
+                    e.getEntity().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You glitched " + lastCause.getName() + "'s presence!");
                 } else {
                     e.setDamage(e.getDamage() * 1.5);
                 }
@@ -167,25 +190,6 @@ public final class LorePowers extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onPearlThrow_NightPearls(ProjectileLaunchEvent e) {
-        if (e.isCancelled()) return;
-        if (!(e.getEntity().getShooter() instanceof Player player)) return;
-        if (!checkPower(player.getUniqueId(), Power.NIGHT_PEARLS)) return;
-        if (e.getEntityType() == EntityType.ENDER_PEARL && player.getInventory().getItemInMainHand().getType() == Material.ENDER_PEARL) {
-            if (player.getWorld().getEnvironment() != World.Environment.NORMAL) return;
-            if (player.getWorld().getGameTime() % 24000 >= 13000) return;
-            Block locToTP = player.getTargetBlockExact(40, FluidCollisionMode.NEVER);
-            if (locToTP != null) {
-                e.setCancelled(true);
-                player.teleport(locToTP.getLocation());
-            } else {
-                e.setCancelled(false);
-                e.getEntity().setVelocity(player.getLocation().getDirection().multiply(3));
-            }
-        }
-    }
-
-    @EventHandler
     public void onJoin_SpeedMine(PlayerJoinEvent e) {
         if (checkPower(e.getPlayer().getUniqueId(), Power.SPEED_MINE)) {
             e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 2, true, true, true));
@@ -194,6 +198,12 @@ public final class LorePowers extends JavaPlugin implements Listener {
     @EventHandler
     public void onConsume_SpeedMine(PlayerItemConsumeEvent e) {
         if (e.getItem().getType() == Material.MILK_BUCKET && checkPower(e.getPlayer().getUniqueId(), Power.SPEED_MINE)) {
+            getServer().getScheduler().scheduleSyncDelayedTask(this, () -> e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 2, true, true, true)), 20L);
+        }
+    }
+    @EventHandler
+    public void onRespawn_SpeedMine(PlayerRespawnEvent e) {
+        if (checkPower(e.getPlayer().getUniqueId(), Power.SPEED_MINE)) {
             getServer().getScheduler().scheduleSyncDelayedTask(this, () -> e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 2, true, true, true)), 20L);
         }
     }
@@ -239,6 +249,17 @@ public final class LorePowers extends JavaPlugin implements Listener {
                     e.setDamage(e.getDamage() * 1.5);
                 }
             }
+        }
+    }
+    @EventHandler
+    public void onRespawn_PiglinAvianTraits(PlayerRespawnEvent e) {
+        if (checkPower(e.getPlayer().getUniqueId(), Power.PIGLIN_AVIAN_TRAITS)) {
+            getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
+                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 1, true, true, true));
+                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 1, true, true, true));
+                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, Integer.MAX_VALUE, 0, true, true, true));
+                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, Integer.MAX_VALUE, 0, true, true, true));
+            }, 20L);
         }
     }
 
@@ -339,7 +360,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
         if (!(e.getDamager() instanceof Player player)) return;
         if (player.isSneaking()) {
             player.setFireTicks(100);
-            player.damage(3);
+            player.damage(2);
             Location playerLocation = player.getLocation();
             Vector direction = playerLocation.getDirection().normalize();
             for (int i = 1; i <= 5; i++) {
@@ -348,9 +369,41 @@ public final class LorePowers extends JavaPlugin implements Listener {
                 for (Entity entity : player.getWorld().getNearbyEntities(checkLocation, 1, 1, 1)) {
                     if (entity instanceof LivingEntity && !entity.equals(player)) {
                         entity.setFireTicks(100);
+                        ((LivingEntity) entity).damage(3);
                     }
                 }
             }
+        }
+    }
+
+    @EventHandler
+    public void onJoin_DragonForm(PlayerJoinEvent e) {
+        if (checkPower(e.getPlayer().getUniqueId(), Power.DRAGON_FORM)) {
+            if (e.getPlayer().getName().equals(".XxdeathflamexX1")) {
+                e.getPlayer().getAttribute(Attribute.SCALE).setBaseValue(0.5);
+            } else {
+                e.getPlayer().getAttribute(Attribute.SCALE).setBaseValue(1.5);
+            }
+            e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 0, true, true, true));
+            e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, Integer.MAX_VALUE, 0, true, true, true));
+        }
+    }
+    @EventHandler
+    public void onConsume_DragonForm(PlayerItemConsumeEvent e) {
+        if (e.getItem().getType() == Material.MILK_BUCKET && checkPower(e.getPlayer().getUniqueId(), Power.DRAGON_FORM)) {
+            getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
+                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 0, true, true, true));
+                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, Integer.MAX_VALUE, 0, true, true, true));
+            }, 20L);
+        }
+    }
+    @EventHandler
+    public void onRespawn_DragonForm(PlayerRespawnEvent e) {
+        if (checkPower(e.getPlayer().getUniqueId(), Power.DRAGON_FORM)) {
+            getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
+                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 0, true, true, true));
+                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, Integer.MAX_VALUE, 0, true, true, true));
+            }, 20L);
         }
     }
 
@@ -412,11 +465,50 @@ public final class LorePowers extends JavaPlugin implements Listener {
                 }
             }
         }
+        if (checkPower(playerUUID, Power.DRAGON_FORM)) {
+            if (player != null) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 0, true, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, Integer.MAX_VALUE, 0, true, true, true));
+                player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have been given your Dragon Form buffs!");
+            }
+        } else {
+            if (player != null) {
+                boolean hasAllEffects = player.hasPotionEffect(PotionEffectType.JUMP_BOOST) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.JUMP_BOOST)).getAmplifier() == 0 &&
+                        player.hasPotionEffect(PotionEffectType.SLOW_FALLING) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.SLOW_FALLING)).getAmplifier() == 0;
+
+                if (hasAllEffects) {
+                    player.removePotionEffect(PotionEffectType.JUMP_BOOST);
+                    player.removePotionEffect(PotionEffectType.SLOW_FALLING);
+                    player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have lost your Dragon Form buffs!");
+                }
+            }
+        }
         if (player != null) {
             if (checkPower(playerUUID, Power.ANKLE_BITER)) {
                 player.getAttribute(Attribute.SCALE).setBaseValue(0.75);
+            } else if (checkPower(playerUUID, Power.DRAGON_FORM)) {
+                if (player.getName().equals(".XxdeathflamexX1")) {
+                    player.getAttribute(Attribute.SCALE).setBaseValue(0.5);
+                } else {
+                    player.getAttribute(Attribute.SCALE).setBaseValue(1.5);
+                }
+            } else if (checkPower(playerUUID, Power.BEE_FLIGHT)) {
+                player.getAttribute(Attribute.SCALE).setBaseValue(0.3);
             } else {
                 player.getAttribute(Attribute.SCALE).setBaseValue(1.0);
+            }
+        }
+        if (checkPower(playerUUID, Power.BEE_FLIGHT)) {
+            if (player != null) {
+                player.setAllowFlight(true);
+                player.setFlying(true);
+                player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(16);
+            }
+        } else {
+            if (player != null) {
+                player.setAllowFlight(false);
+                player.setFlying(false);
+                player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20);
             }
         }
     }

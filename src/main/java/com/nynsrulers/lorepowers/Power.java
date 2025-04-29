@@ -1,14 +1,16 @@
 package com.nynsrulers.lorepowers;
 
 public enum Power {
-    VOID_TOTEMS("Void Totems", "Gives the player the ability to bypass totems on kill."), // Aelithron's power
+    // Aelithron's powers:
+    VOID_TOTEMS("Void Totems", "Gives the player the ability to bypass totems on kill."),
+    BEE_FLIGHT("Bee Flight", "Allows the player to fly like a bee."),
     SPEED_MINE("Speed Mine", "Gives the player infinite Haste 3."), // Dndmastr's power
     PERMANENT_ELYTRA("Permanent Elytra", "Gives the player a permanent, soulbound elytra."), // Exotic Butterfly's power
     GLITCHED_PRESENCE("Glitched Presence", "Only allows the player to be attacked by swords."), // Oli7211's power
     DRAGON_FORM("Dragon Form", "Allows the player to transform into a powerful dragon."), // Power shared between SlothDragon and XxDeathFlamexX.
     //DRAGON_FORM_CARNAGE("Dragon Form Carnage", "Allows the player to destroy a large area while in Dragon Form."), // SlothDragon's power
     // Villagecreep's powers:
-    NIGHT_PEARLS("Night Pearls", "Gives the player infinite, faster ender pearls during the night."),
+    SPECTER_VANISH("Specter Vanish", "Allows the player to enter Spectator Mode for a short period of time."),
     MAP_WARP("Map Warp", "Allows the player to teleport to the center of a map."),
     // Violet_Feather's powers:
     PIGLIN_AVIAN_TRAITS("Piglin-Avian Traits", "Grants the player increased speed, agility, and strength."),
