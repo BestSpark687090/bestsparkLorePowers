@@ -16,15 +16,10 @@ repositories {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
-    maven {
-        name = "md_5"
-        url "https://repo.md-5.net/content/groups/public/"
-    }
 }
 
 dependencies {
     compileOnly("org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT")
-    implementation(group: 'me.libraryaddict.disguises', name: 'libsdisguises', version: '11.0.0')
 }
 
 tasks {
