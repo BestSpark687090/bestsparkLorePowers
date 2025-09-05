@@ -488,7 +488,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
                 player.getAttribute(Attribute.SCALE).setBaseValue(0.75);
             } else if (checkPower(playerUUID, Power.DRAGON_FORM)) {
                 if (player.getName().equals(".XxdeathflamexX1")) {
-                    player.getAttribute(Attribute.SCALE).setBaseValue(0.5);
+                    player.getAttribute(Attribute.SCALE).setBaseValue(2.0);
                 } else {
                     player.getAttribute(Attribute.SCALE).setBaseValue(1.5);
                 }
