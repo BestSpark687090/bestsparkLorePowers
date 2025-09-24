@@ -44,6 +44,21 @@ public final class LorePowers extends JavaPlugin implements Listener {
     }
 
     @EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+        powerEditCallback(e.getPlayer().getUniqueId());
+    }
+    @EventHandler
+    public void onConsume(PlayerItemConsumeEvent e) {
+        if (e.getItem().getType() == Material.MILK_BUCKET) {
+            powerEditCallback(e.getPlayer().getUniqueId());
+        }
+    }
+    @EventHandler
+    public void onRespawn(PlayerRespawnEvent e) {
+        powerEditCallback(e.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
     public void onTotem_VoidTotems(EntityResurrectEvent e) {
         if (e.isCancelled()) return;
         Entity lastCause = e.getEntity().getLastDamageCause().getDamageSource().getCausingEntity();
@@ -64,15 +79,6 @@ public final class LorePowers extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler
-    public void onJoin_BeeFlight(PlayerJoinEvent e) {
-        if (checkPower(e.getPlayer().getUniqueId(), Power.BEE_FLIGHT)) {
-            e.getPlayer().setAllowFlight(true);
-            e.getPlayer().setFlying(true);
-            e.getPlayer().getAttribute(Attribute.SCALE).setBaseValue(0.5);
-            e.getPlayer().getAttribute(Attribute.MAX_HEALTH).setBaseValue(16);
-        }
-    }
     @EventHandler
     public void onAttack_BeeFlight(EntityDamageByEntityEvent e) {
         if (e.isCancelled()) return;
@@ -189,24 +195,6 @@ public final class LorePowers extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onJoin_SpeedMine(PlayerJoinEvent e) {
-        if (checkPower(e.getPlayer().getUniqueId(), Power.SPEED_MINE)) {
-            e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 2, true, true, true));
-        }
-    }
-    @EventHandler
-    public void onConsume_SpeedMine(PlayerItemConsumeEvent e) {
-        if (e.getItem().getType() == Material.MILK_BUCKET && checkPower(e.getPlayer().getUniqueId(), Power.SPEED_MINE)) {
-            getServer().getScheduler().scheduleSyncDelayedTask(this, () -> e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 2, true, true, true)), 20L);
-        }
-    }
-    @EventHandler
-    public void onRespawn_SpeedMine(PlayerRespawnEvent e) {
-        if (checkPower(e.getPlayer().getUniqueId(), Power.SPEED_MINE)) {
-            getServer().getScheduler().scheduleSyncDelayedTask(this, () -> e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 2, true, true, true)), 20L);
-        }
-    }
-    @EventHandler
     public void onBoat_SpeedMine(VehicleEnterEvent e) {
         if (e.getVehicle() instanceof Boat && e.getEntered() instanceof Player) {
             if (checkPower(((Player) e.getEntered()).getUniqueId(), Power.SPEED_MINE)) {
@@ -218,27 +206,6 @@ public final class LorePowers extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onJoin_PiglinAvianTraits(PlayerJoinEvent e) {
-        Player player = e.getPlayer();
-        if (checkPower(player.getUniqueId(), Power.PIGLIN_AVIAN_TRAITS)) {
-            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 1, true, true, true));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 1, true, true, true));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, Integer.MAX_VALUE, 0, true, true, true));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, Integer.MAX_VALUE, 0, true, true, true));
-        }
-    }
-    @EventHandler
-    public void onConsume_PiglinAvianTraits(PlayerItemConsumeEvent e) {
-        if (e.getItem().getType() == Material.MILK_BUCKET && checkPower(e.getPlayer().getUniqueId(), Power.PIGLIN_AVIAN_TRAITS)) {
-            getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
-                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 1, true, true, true));
-                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 1, true, true, true));
-                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, Integer.MAX_VALUE, 0, true, true, true));
-                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, Integer.MAX_VALUE, 0, true, true, true));
-            }, 20L);
-        }
-    }
-    @EventHandler
     public void onHit_PiglinAvianTraits(EntityDamageByEntityEvent e) {
         if (e.isCancelled()) return;
         if (e.getEntity() instanceof Player && checkPower(e.getEntity().getUniqueId(), Power.PIGLIN_AVIAN_TRAITS)) {
@@ -248,17 +215,6 @@ public final class LorePowers extends JavaPlugin implements Listener {
                     e.setDamage(e.getDamage() * 1.5);
                 }
             }
-        }
-    }
-    @EventHandler
-    public void onRespawn_PiglinAvianTraits(PlayerRespawnEvent e) {
-        if (checkPower(e.getPlayer().getUniqueId(), Power.PIGLIN_AVIAN_TRAITS)) {
-            getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
-                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 1, true, true, true));
-                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 1, true, true, true));
-                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, Integer.MAX_VALUE, 0, true, true, true));
-                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, Integer.MAX_VALUE, 0, true, true, true));
-            }, 20L);
         }
     }
 
@@ -346,12 +302,6 @@ public final class LorePowers extends JavaPlugin implements Listener {
             }
         }
     }
-    @EventHandler
-    public void onJoin_AnkleBiter(PlayerJoinEvent e) {
-        if (checkPower(e.getPlayer().getUniqueId(), Power.ANKLE_BITER)) {
-            e.getPlayer().getAttribute(Attribute.SCALE).setBaseValue(0.75);
-        }
-    }
 
     @EventHandler
     public void onDamage_FireBreath(EntityDamageByEntityEvent e) {
@@ -373,37 +323,6 @@ public final class LorePowers extends JavaPlugin implements Listener {
                     }
                 }
             }
-        }
-    }
-
-    @EventHandler
-    public void onJoin_DragonForm(PlayerJoinEvent e) {
-        if (checkPower(e.getPlayer().getUniqueId(), Power.DRAGON_FORM)) {
-            if (e.getPlayer().getName().equals(".XxdeathflamexX1")) {
-                e.getPlayer().getAttribute(Attribute.SCALE).setBaseValue(0.5);
-            } else {
-                e.getPlayer().getAttribute(Attribute.SCALE).setBaseValue(1.5);
-            }
-            e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 0, true, true, true));
-            e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, Integer.MAX_VALUE, 0, true, true, true));
-        }
-    }
-    @EventHandler
-    public void onConsume_DragonForm(PlayerItemConsumeEvent e) {
-        if (e.getItem().getType() == Material.MILK_BUCKET && checkPower(e.getPlayer().getUniqueId(), Power.DRAGON_FORM)) {
-            getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
-                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 0, true, true, true));
-                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, Integer.MAX_VALUE, 0, true, true, true));
-            }, 20L);
-        }
-    }
-    @EventHandler
-    public void onRespawn_DragonForm(PlayerRespawnEvent e) {
-        if (checkPower(e.getPlayer().getUniqueId(), Power.DRAGON_FORM)) {
-            getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
-                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 0, true, true, true));
-                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, Integer.MAX_VALUE, 0, true, true, true));
-            }, 20L);
         }
     }
 
