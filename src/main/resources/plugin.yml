@@ -4,9 +4,9 @@ main: com.nynsrulers.lorepowers.LorePowers
 api-version: '1.21'
 prefix: LorePowers
 authors: [ Aelithron ]
-description: A plugin that adds the powers from the NYNS lore.
+description: Powers on the Minecraft server side. Adds the powers from the NYNS lore.
 website: https://github.com/nynsrulers/lorepowers
-depend:
+softdepend:
   - LibsDisguises
 commands:
   lorepowers:

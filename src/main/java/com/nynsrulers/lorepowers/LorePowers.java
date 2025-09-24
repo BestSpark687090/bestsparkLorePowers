@@ -21,6 +21,7 @@ import org.bukkit.util.Vector;
 
 public final class LorePowers extends JavaPlugin implements Listener {
     public List<UUID> dragonFormActive = new ArrayList<>();
+    public boolean libsDisguisesInstalled = false;
 
     @Override
     public void onEnable() {
@@ -31,6 +32,9 @@ public final class LorePowers extends JavaPlugin implements Listener {
         getCommand("lorepowers").setExecutor(new ManageCMD(this));
         getCommand("lorepowers").setTabCompleter(new ManageTabCompleter());
         getCommand("dragonform").setExecutor(new DragonFormCMD(this));
+        if (getServer().getPluginManager().getPlugin("LibsDisguises") != null) {
+            libsDisguisesInstalled = true;
+        }
         CoreTools.getInstance().checkForUpdates();
     }
 
@@ -331,28 +335,24 @@ public final class LorePowers extends JavaPlugin implements Listener {
         CoreTools.getInstance().setPlugin(this);
         CoreTools.getInstance().checkForUpdates();
         for (Player player : getServer().getOnlinePlayers()) {
+            // checks to make sure powers are valid!
+            for (String power : getConfig().getStringList("PowerLinks." + player.getUniqueId())) {
+                try {
+                    Power.valueOf(power);
+                } catch (IllegalArgumentException e) {
+                    getLogger().warning("Power " + power + " (under player " + player.getUniqueId() + ") is not a valid power.");
+                }
+            }
             powerEditCallback(player.getUniqueId());
         }
     }
 
     public void powerEditCallback(UUID playerUUID) {
-        List<Power> playerPowers = new ArrayList<>();
-        for (String power : getConfig().getStringList("PowerLinks." + playerUUID.toString())) {
-            try {
-                playerPowers.add(Power.valueOf(power));
-            } catch (IllegalArgumentException e) {
-                getLogger().warning("Power " + power + " is not a valid power.");
-            }
-        }
-        if (playerPowers.isEmpty()) {
-            return;
-        }
         Player player = getServer().getPlayer(playerUUID);
-
+        // potion effect management
         if (checkPower(playerUUID, Power.SPEED_MINE)) {
             if (player != null) {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 2, true, true, true));
-                player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have been given Speed Mine (Haste 3)!");
             }
         } else {
             if (player != null && player.hasPotionEffect(PotionEffectType.HASTE) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.HASTE)).getAmplifier() == 2) {
@@ -388,7 +388,6 @@ public final class LorePowers extends JavaPlugin implements Listener {
             if (player != null) {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 0, true, true, true));
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, Integer.MAX_VALUE, 0, true, true, true));
-                player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have been given your Dragon Form buffs!");
             }
         } else {
             if (player != null) {
@@ -402,8 +401,11 @@ public final class LorePowers extends JavaPlugin implements Listener {
                 }
             }
         }
+        // scale management
         if (player != null) {
-            if (checkPower(playerUUID, Power.ANKLE_BITER)) {
+            if (checkPower(playerUUID, Power.BEE_FLIGHT)) {
+                player.getAttribute(Attribute.SCALE).setBaseValue(0.3);
+            } else if (checkPower(playerUUID, Power.ANKLE_BITER)) {
                 player.getAttribute(Attribute.SCALE).setBaseValue(0.75);
             } else if (checkPower(playerUUID, Power.DRAGON_FORM)) {
                 if (player.getName().equals(".XxdeathflamexX1")) {
@@ -411,12 +413,11 @@ public final class LorePowers extends JavaPlugin implements Listener {
                 } else {
                     player.getAttribute(Attribute.SCALE).setBaseValue(1.5);
                 }
-            } else if (checkPower(playerUUID, Power.BEE_FLIGHT)) {
-                player.getAttribute(Attribute.SCALE).setBaseValue(0.3);
             } else {
                 player.getAttribute(Attribute.SCALE).setBaseValue(1.0);
             }
         }
+        // flight management
         if (checkPower(playerUUID, Power.BEE_FLIGHT)) {
             if (player != null) {
                 player.setAllowFlight(true);
