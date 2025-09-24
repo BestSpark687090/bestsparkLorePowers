@@ -422,12 +422,20 @@ public final class LorePowers extends JavaPlugin implements Listener {
             if (player != null) {
                 player.setAllowFlight(true);
                 player.setFlying(true);
+            }
+        } else {
+            if (player != null && player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR) {
+                player.setAllowFlight(false);
+                player.setFlying(false);
+            }
+        }
+        // health management
+        if (checkPower(playerUUID, Power.BEE_FLIGHT)) {
+            if (player != null) {
                 player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(16);
             }
         } else {
             if (player != null) {
-                player.setAllowFlight(false);
-                player.setFlying(false);
                 player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20);
             }
         }

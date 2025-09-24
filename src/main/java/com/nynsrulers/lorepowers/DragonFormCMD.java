@@ -21,6 +21,10 @@ public class DragonFormCMD implements CommandExecutor {
 //      sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "This command can only be used by players.");
 //      return false;
 //    }
+//    if (!plugin.libsDisguisesInstalled) {
+//        sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "This power is not enabled, as Lib's Disguises is not installed!");
+//        return false;
+//    }
 //    Player player = (Player) sender;
 //    if (!plugin.checkPower(player.getUniqueId(), Power.DRAGON_FORM)) {
 //      sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You do not have this power!.");
