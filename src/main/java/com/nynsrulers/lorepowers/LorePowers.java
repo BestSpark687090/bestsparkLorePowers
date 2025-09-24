@@ -4,7 +4,6 @@ import java.util.*;
 
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -275,6 +274,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
         }
     }
 
+    // TODO: Fix this power, it is somewhat broken!
     @EventHandler
     public void onDamageByEnemy_PiglinAid(EntityDamageByEntityEvent e) {
         if (e.isCancelled()) return;
