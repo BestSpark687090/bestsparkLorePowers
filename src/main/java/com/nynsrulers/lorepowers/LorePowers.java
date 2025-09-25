@@ -54,12 +54,16 @@ public final class LorePowers extends JavaPlugin implements Listener {
     @EventHandler
     public void onConsume(PlayerItemConsumeEvent e) {
         if (e.getItem().getType() == Material.MILK_BUCKET) {
-            powerEditCallback(e.getPlayer().getUniqueId());
+            getServer().getScheduler().runTaskLater(this, () -> {
+                powerEditCallback(e.getPlayer().getUniqueId());
+            }, 20L);
         }
     }
     @EventHandler
     public void onRespawn(PlayerRespawnEvent e) {
-        powerEditCallback(e.getPlayer().getUniqueId());
+        getServer().getScheduler().runTaskLater(this, () -> {
+            powerEditCallback(e.getPlayer().getUniqueId());
+        }, 20L);
     }
 
     @EventHandler
@@ -401,10 +405,22 @@ public final class LorePowers extends JavaPlugin implements Listener {
                 }
             }
         }
+        if (checkPower(playerUUID, Power.VILLAGERS_RESPECT)) {
+            if (player != null) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HERO_OF_THE_VILLAGE, Integer.MAX_VALUE, 0, true, true, true));
+            }
+        } else {
+            if (player != null && player.hasPotionEffect(PotionEffectType.HERO_OF_THE_VILLAGE) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.HERO_OF_THE_VILLAGE)).getAmplifier() == 0) {
+                player.removePotionEffect(PotionEffectType.LUCK);
+                player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have lost Villagers' Respect (Luck 1)!");
+            }
+        }
         // scale management
         if (player != null) {
             if (checkPower(playerUUID, Power.BEE_FLIGHT)) {
                 player.getAttribute(Attribute.SCALE).setBaseValue(0.3);
+            } else if (checkPower(playerUUID, Power.VILLAGERS_RESPECT)) {
+                player.getAttribute(Attribute.SCALE).setBaseValue(0.5);
             } else if (checkPower(playerUUID, Power.ANKLE_BITER)) {
                 player.getAttribute(Attribute.SCALE).setBaseValue(0.75);
             } else if (checkPower(playerUUID, Power.DRAGON_FORM)) {
@@ -418,24 +434,24 @@ public final class LorePowers extends JavaPlugin implements Listener {
             }
         }
         // flight management
-        if (checkPower(playerUUID, Power.BEE_FLIGHT)) {
-            if (player != null) {
+        if (player != null) {
+            if (checkPower(playerUUID, Power.BEE_FLIGHT)) {
                 player.setAllowFlight(true);
                 player.setFlying(true);
-            }
-        } else {
-            if (player != null && player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR) {
-                player.setAllowFlight(false);
-                player.setFlying(false);
+            } else {
+                if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR) {
+                    player.setAllowFlight(false);
+                    player.setFlying(false);
+                }
             }
         }
         // health management
-        if (checkPower(playerUUID, Power.BEE_FLIGHT)) {
-            if (player != null) {
+        if (player != null) {
+            if (checkPower(playerUUID, Power.BEE_FLIGHT)) {
                 player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(16);
-            }
-        } else {
-            if (player != null) {
+            } else if (checkPower(playerUUID, Power.DRAGON_FORM)) {
+                player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(24);
+            } else {
                 player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20);
             }
         }

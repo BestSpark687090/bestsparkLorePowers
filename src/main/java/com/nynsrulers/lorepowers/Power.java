@@ -14,12 +14,12 @@ public enum Power {
     HEAT_RESISTANCE("Heat Resistance"),
     PIGLIN_AID("Piglin Aid"),
     ANKLE_BITER("Ankle Biter"),
-    FIRE_BREATH("Fire Breath");
+    FIRE_BREATH("Fire Breath"),
     //PICK_UP("Pick-Me-Up");
     //DRAGON_FORM_WEAPON_BLOCK("Dragon Form Weapon Block"),
     //DRAGON_FORM_FIRE_BUFF("Dragon Form Fire Buff"),
-    //DRAGON_FORM_SPIKES("Dragon Form Spikes");
-    //VILLAGERS_RESPECT("Villager's Respect");
+    //DRAGON_FORM_SPIKES("Dragon Form Spikes"),
+    VILLAGERS_RESPECT("Villager's Respect");
     //FOX_MAGIC("Fox's Magic");
 
     private final String name;
