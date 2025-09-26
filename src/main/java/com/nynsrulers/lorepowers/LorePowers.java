@@ -364,6 +364,16 @@ public final class LorePowers extends JavaPlugin implements Listener {
                 player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have lost Speed Mine (Haste 3)!");
             }
         }
+        if (checkPower(playerUUID, Power.VILLAGERS_RESPECT)) {
+            if (player != null) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HERO_OF_THE_VILLAGE, Integer.MAX_VALUE, 1, true, true, true));
+            }
+        } else {
+            if (player != null && player.hasPotionEffect(PotionEffectType.HERO_OF_THE_VILLAGE) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.HERO_OF_THE_VILLAGE)).getAmplifier() == 1) {
+                player.removePotionEffect(PotionEffectType.HERO_OF_THE_VILLAGE);
+                player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have lost Villager's Respect (Hero of the Village 2)!");
+            }
+        }
         if (checkPower(playerUUID, Power.PIGLIN_AVIAN_TRAITS)) {
             if (player != null) {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 1, true, true, true));
@@ -449,6 +459,8 @@ public final class LorePowers extends JavaPlugin implements Listener {
         if (player != null) {
             if (checkPower(playerUUID, Power.BEE_FLIGHT)) {
                 player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(16);
+            } else if (checkPower(playerUUID, Power.FOX_MAGIC)) {
+                player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(18);
             } else if (checkPower(playerUUID, Power.DRAGON_FORM)) {
                 player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(24);
             } else {
