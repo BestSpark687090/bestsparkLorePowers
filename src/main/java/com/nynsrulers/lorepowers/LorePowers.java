@@ -371,6 +371,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
     public void onPlayerClick_PickUp(PlayerInteractEntityEvent e) {
         if (e.isCancelled()) return;
         if (!checkPower(e.getPlayer().getUniqueId(), Power.PICK_UP)) return;
+        if (!e.getPlayer().isSneaking()) return;
         if (!(e.getRightClicked() instanceof Player carried)) return;
         e.getPlayer().addPassenger(carried);
         e.getPlayer().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You picked up " + carried.getName() + ChatColor.GREEN + "!");
