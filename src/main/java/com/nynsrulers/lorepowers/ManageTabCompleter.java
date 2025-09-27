@@ -15,9 +15,9 @@ public class ManageTabCompleter implements TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (command.getName().equalsIgnoreCase("lorepowers") || command.getName().equalsIgnoreCase("powermgr")) {
             if (args.length == 1) {
-                return Arrays.asList("reload", "list", "add", "remove", "forcecallback");
+                return Arrays.asList("reload", "list", "add", "remove", "forcecallback", "removecooldowns");
             } else if (args.length == 2) {
-                if (args[0].equalsIgnoreCase("list") || args[0].equalsIgnoreCase("forcecallback")) {
+                if (args[0].equalsIgnoreCase("list") || args[0].equalsIgnoreCase("forcecallback") || args[0].equalsIgnoreCase("removecooldowns")) {
                     return onlinePlayers();
                 }
                 if (args[0].equalsIgnoreCase("add") || args[0].equalsIgnoreCase("remove")) {

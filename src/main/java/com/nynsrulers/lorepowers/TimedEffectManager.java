@@ -33,11 +33,11 @@ public class TimedEffectManager {
             if (plugin.checkPower(player.getUniqueId(), Power.FOX_MAGIC)) {
                 if (time >= 0 && time < 12300) {
                     // day effects
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 0, true, false));
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 1, true, false));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 320, 0, true, false));
                 } else {
                     // night effects
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 320, 0, true, false));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 0, true, false));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 1, true, false));
                 }
             }
         }, 0L, 180L);

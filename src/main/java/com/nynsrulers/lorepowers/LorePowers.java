@@ -344,26 +344,26 @@ public final class LorePowers extends JavaPlugin implements Listener {
     public void onAttack_FoxMagic(EntityDamageByEntityEvent e) {
         if (e.isCancelled()) return;
         CooldownManager cooldown = CooldownManager.getInstance();
-        if (e.getDamager() instanceof Player player && checkPower(e.getDamager().getUniqueId(), Power.FOX_MAGIC)) {
-            if (player.getInventory().getItemInMainHand().getType() == Material.AIR && cooldown.checkCooldown(player.getUniqueId(), Power.FOX_MAGIC)) {
-                cooldown.addCooldown(player.getUniqueId(), Power.FOX_MAGIC, 600L);
-                player.setVelocity(new Vector(0, 32, 0));
-                player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You pounced on " + e.getEntity().getName() + ChatColor.GREEN + "!");
-                getServer().getScheduler().runTaskLater(this, () -> {
-                    for (Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), 2, 2, 2)) {
-                        if (!(entity instanceof LivingEntity)) continue;
-                        if (entity.equals(player)) continue;
-                        ((LivingEntity) entity).damage(6, player);
-                        if (entity instanceof Player) {
-                            entity.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You were pounced on by " + player.getName() + ChatColor.RED + "!");
-                        }
-                        if (!entity.equals(e.getEntity())) {
-                            player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You also hit " + entity.getName() + ChatColor.GREEN + "!");
-                        }
-                    }
-                }, 20L);
+        if (!(e.getDamager() instanceof Player player)) return;
+        if (!checkPower(e.getDamager().getUniqueId(), Power.FOX_MAGIC)) return;
+        if (player.getInventory().getItemInMainHand().getType() == Material.AIR) return;
+        if (cooldown.checkCooldown(player.getUniqueId(), Power.FOX_MAGIC)) return;
+        cooldown.addCooldown(player.getUniqueId(), Power.FOX_MAGIC, 600L);
+        player.setVelocity(new Vector(0, 32, 0));
+        player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You pounced on " + e.getEntity().getName() + ChatColor.GREEN + "!");
+        getServer().getScheduler().runTaskLater(this, () -> {
+            for (Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), 2, 2, 2)) {
+                if (!(entity instanceof LivingEntity)) continue;
+                if (entity.equals(player)) continue;
+                ((LivingEntity) entity).damage(6, player);
+                if (entity instanceof Player) {
+                    entity.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You were pounced on by " + player.getName() + ChatColor.RED + "!");
+                }
+                if (!entity.equals(e.getEntity())) {
+                    player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You also hit " + entity.getName() + ChatColor.GREEN + "!");
+                }
             }
-        }
+        }, 20L);
     }
 
     void reloadPlugin() {
