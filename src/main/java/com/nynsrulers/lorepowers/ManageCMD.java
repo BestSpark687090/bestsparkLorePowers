@@ -37,12 +37,16 @@ public class ManageCMD implements CommandExecutor {
             } else {
                 playerToCheck = plugin.getServer().getOfflinePlayer(args[1]).getUniqueId();
             }
-            List<String> powers = plugin.getConfig().getStringList("PowerLinks." + playerToCheck.toString());
+            List<String> powers = plugin.getConfig().getStringList("PowerLinks." + playerToCheck);
             if (powers.isEmpty()) {
                 sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "That player does not have any powers.");
             } else {
                 sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "Powers of " + plugin.getServer().getOfflinePlayer(playerToCheck).getName() + ":");
                 for (String power : powers) {
+                    if (CooldownManager.getInstance().checkCooldown(playerToCheck, Power.valueOf(power))) {
+                        sender.sendMessage(ChatColor.AQUA + "- " + Power.valueOf(power).getName() + ChatColor.RED + " (On Cooldown)");
+                        continue;
+                    }
                     sender.sendMessage(ChatColor.AQUA + "- " + Power.valueOf(power).getName());
                 }
             }
@@ -121,6 +125,17 @@ public class ManageCMD implements CommandExecutor {
             sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "Forced power edit callback for " + plugin.getServer().getOfflinePlayer(playerToForce).getName() + ".");
             return true;
         }
+        if (args[0].equalsIgnoreCase("removecooldowns")) {
+            UUID playerToForce;
+            if (args.length == 1 && sender instanceof Player) {
+                playerToForce = ((Player) sender).getUniqueId();
+            } else {
+                playerToForce = plugin.getServer().getOfflinePlayer(args[1]).getUniqueId();
+            }
+            CooldownManager.getInstance().removePlayerCooldowns(playerToForce);
+            sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "Removed all cooldowns for " + plugin.getServer().getOfflinePlayer(playerToForce).getName() + ".");
+            return true;
+        }
         sendHelpMessage(sender);
         return false;
     }
@@ -131,6 +146,7 @@ public class ManageCMD implements CommandExecutor {
         sender.sendMessage(ChatColor.AQUA + "/lorepowers add <power> [player]: Add a power to a player.");
         sender.sendMessage(ChatColor.AQUA + "/lorepowers remove <power> [player]: Remove a power from a player.");
         sender.sendMessage(ChatColor.AQUA + "/lorepowers forcecallback [player]: Force the power edit callback for a player.");
+        sender.sendMessage(ChatColor.AQUA + "/lorepowers removecooldowns [player]: Clears all cooldowns for a player.");
     }
     private List<String> getPowers(UUID playerToCheck) {
         return plugin.getConfig().getStringList("PowerLinks." + playerToCheck.toString());

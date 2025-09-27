@@ -19,8 +19,8 @@ public enum Power {
     //DRAGON_FORM_WEAPON_BLOCK("Dragon Form Weapon Block"),
     //DRAGON_FORM_FIRE_BUFF("Dragon Form Fire Buff"),
     //DRAGON_FORM_SPIKES("Dragon Form Spikes"),
-    VILLAGERS_RESPECT("Villager's Respect");
-    //FOX_MAGIC("Fox's Magic");
+    VILLAGERS_RESPECT("Villager's Respect"),
+    FOX_MAGIC("Fox's Magic");
 
     private final String name;
 

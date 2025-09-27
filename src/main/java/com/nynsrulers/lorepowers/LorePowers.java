@@ -29,6 +29,8 @@ public final class LorePowers extends JavaPlugin implements Listener {
         saveDefaultConfig();
         getServer().getPluginManager().registerEvents(this, this);
         CoreTools.getInstance().setPlugin(this);
+        TimedEffectManager.getInstance().setPlugin(this);
+        CooldownManager.getInstance().setPlugin(this);
         getCommand("lorepowers").setExecutor(new ManageCMD(this));
         getCommand("lorepowers").setTabCompleter(new ManageTabCompleter());
         getCommand("dragonform").setExecutor(new DragonFormCMD(this));
@@ -40,7 +42,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        TimedEffectManager.getInstance().stopAll();
     }
 
     public boolean checkPower(UUID playerUUID, Power power) {
@@ -64,6 +66,10 @@ public final class LorePowers extends JavaPlugin implements Listener {
         getServer().getScheduler().runTaskLater(this, () -> {
             powerEditCallback(e.getPlayer().getUniqueId());
         }, 20L);
+    }
+    @EventHandler
+    public void onLeave(PlayerQuitEvent e) {
+        TimedEffectManager.getInstance().stopTimedPower(e.getPlayer());
     }
 
     @EventHandler
@@ -334,10 +340,40 @@ public final class LorePowers extends JavaPlugin implements Listener {
         }
     }
 
+    @EventHandler
+    public void onAttack_FoxMagic(EntityDamageByEntityEvent e) {
+        if (e.isCancelled()) return;
+        CooldownManager cooldown = CooldownManager.getInstance();
+        if (!(e.getDamager() instanceof Player player)) return;
+        if (!checkPower(e.getDamager().getUniqueId(), Power.FOX_MAGIC)) return;
+        if (player.getInventory().getItemInMainHand().getType() != Material.AIR) return;
+        if (cooldown.checkCooldown(player.getUniqueId(), Power.FOX_MAGIC)) return;
+        cooldown.addCooldown(player.getUniqueId(), Power.FOX_MAGIC, 600L);
+        player.setVelocity(new Vector(player.getVelocity().getX(), 1.5, player.getVelocity().getZ()));
+        player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You pounced on " + e.getEntity().getName() + ChatColor.GREEN + "!");
+        getServer().getScheduler().runTaskLater(this, () -> {
+            for (Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), 2, 6, 2)) {
+                if (!(entity instanceof LivingEntity)) continue;
+                if (entity.equals(player)) continue;
+                ((LivingEntity) entity).damage(5, player);
+                if (entity instanceof Player) {
+                    entity.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You were pounced on by " + player.getName() + ChatColor.RED + "!");
+                }
+                if (!entity.equals(e.getEntity())) {
+                    player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You also hit " + entity.getName() + ChatColor.GREEN + "!");
+                }
+            }
+        }, 30L);
+    }
+
     void reloadPlugin() {
         reloadConfig();
         CoreTools.getInstance().setPlugin(this);
+        TimedEffectManager.getInstance().setPlugin(this);
+        CooldownManager.getInstance().setPlugin(this);
         CoreTools.getInstance().checkForUpdates();
+        TimedEffectManager.getInstance().stopAll();
+        CooldownManager.getInstance().removeAllCooldowns();
         for (Player player : getServer().getOnlinePlayers()) {
             // checks to make sure powers are valid!
             for (String power : getConfig().getStringList("PowerLinks." + player.getUniqueId())) {
@@ -362,6 +398,16 @@ public final class LorePowers extends JavaPlugin implements Listener {
             if (player != null && player.hasPotionEffect(PotionEffectType.HASTE) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.HASTE)).getAmplifier() == 2) {
                 player.removePotionEffect(PotionEffectType.HASTE);
                 player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have lost Speed Mine (Haste 3)!");
+            }
+        }
+        if (checkPower(playerUUID, Power.VILLAGERS_RESPECT)) {
+            if (player != null) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HERO_OF_THE_VILLAGE, Integer.MAX_VALUE, 1, true, true, true));
+            }
+        } else {
+            if (player != null && player.hasPotionEffect(PotionEffectType.HERO_OF_THE_VILLAGE) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.HERO_OF_THE_VILLAGE)).getAmplifier() == 1) {
+                player.removePotionEffect(PotionEffectType.HERO_OF_THE_VILLAGE);
+                player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have lost Villager's Respect (Hero of the Village 2)!");
             }
         }
         if (checkPower(playerUUID, Power.PIGLIN_AVIAN_TRAITS)) {
@@ -405,18 +451,8 @@ public final class LorePowers extends JavaPlugin implements Listener {
                 }
             }
         }
-        if (checkPower(playerUUID, Power.VILLAGERS_RESPECT)) {
-            if (player != null) {
-                player.addPotionEffect(new PotionEffect(PotionEffectType.HERO_OF_THE_VILLAGE, Integer.MAX_VALUE, 0, true, true, true));
-            }
-        } else {
-            if (player != null && player.hasPotionEffect(PotionEffectType.HERO_OF_THE_VILLAGE) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.HERO_OF_THE_VILLAGE)).getAmplifier() == 0) {
-                player.removePotionEffect(PotionEffectType.LUCK);
-                player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have lost Villagers' Respect (Luck 1)!");
-            }
-        }
-        // scale management
         if (player != null) {
+            // scale management
             if (checkPower(playerUUID, Power.BEE_FLIGHT)) {
                 player.getAttribute(Attribute.SCALE).setBaseValue(0.3);
             } else if (checkPower(playerUUID, Power.VILLAGERS_RESPECT)) {
@@ -432,9 +468,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
             } else {
                 player.getAttribute(Attribute.SCALE).setBaseValue(1.0);
             }
-        }
-        // flight management
-        if (player != null) {
+            // flight management
             if (checkPower(playerUUID, Power.BEE_FLIGHT)) {
                 player.setAllowFlight(true);
                 player.setFlying(true);
@@ -444,15 +478,21 @@ public final class LorePowers extends JavaPlugin implements Listener {
                     player.setFlying(false);
                 }
             }
-        }
-        // health management
-        if (player != null) {
+            // health management
             if (checkPower(playerUUID, Power.BEE_FLIGHT)) {
                 player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(16);
+            } else if (checkPower(playerUUID, Power.FOX_MAGIC)) {
+                player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(18);
             } else if (checkPower(playerUUID, Power.DRAGON_FORM)) {
                 player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(24);
             } else {
                 player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20);
+            }
+            // timed effect management
+            if (checkPower(playerUUID, Power.FOX_MAGIC)) {
+                TimedEffectManager.getInstance().startTimedPower(player);
+            } else {
+                TimedEffectManager.getInstance().stopTimedPower(player);
             }
         }
     }
