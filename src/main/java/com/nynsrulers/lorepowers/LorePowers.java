@@ -66,6 +66,10 @@ public final class LorePowers extends JavaPlugin implements Listener {
             powerEditCallback(e.getPlayer().getUniqueId());
         }, 20L);
     }
+    @EventHandler
+    public void onLeave(PlayerQuitEvent e) {
+        TimedEffectManager.getInstance().stopTimedPower(e.getPlayer());
+    }
 
     @EventHandler
     public void onTotem_VoidTotems(EntityResurrectEvent e) {
@@ -331,6 +335,29 @@ public final class LorePowers extends JavaPlugin implements Listener {
                         ((LivingEntity) entity).damage(3);
                     }
                 }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onAttack_FoxMagic(EntityDamageByEntityEvent e) {
+        if (e.isCancelled()) return;
+        CooldownManager cooldown = CooldownManager.getInstance();
+        if (e.getDamager() instanceof Player player && checkPower(e.getDamager().getUniqueId(), Power.FOX_MAGIC)) {
+            if (player.getInventory().getItemInMainHand().getType() == Material.AIR && cooldown.checkCooldown(player.getUniqueId(), Power.FOX_MAGIC)) {
+                cooldown.addCooldown(player.getUniqueId(), Power.FOX_MAGIC, 600L);
+                player.setVelocity(new Vector(0, 32, 0));
+                getServer().getScheduler().runTaskLater(this, () -> {
+                    for (Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), 1.5, 1.5, 1.5)) {
+                        if (!(entity instanceof LivingEntity)) continue;
+                        if (entity.equals(player)) continue;
+                        ((LivingEntity) entity).damage(6, player);
+                        if (entity instanceof Player) {
+                            entity.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You were pounced on by " + e.getDamager().getName() + ChatColor.RED + "!");
+                        }
+                        e.getDamager().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You pounced on " + e.getEntity().getName() + ChatColor.GREEN + "!");
+                    }
+                }, 20L);
             }
         }
     }
