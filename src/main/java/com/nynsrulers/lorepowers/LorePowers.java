@@ -8,6 +8,7 @@ import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.Event.Result;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
@@ -364,6 +365,16 @@ public final class LorePowers extends JavaPlugin implements Listener {
                 }
             }
         }, 30L);
+    }
+
+    @EventHandler
+    public void onPlayerClick_PickUp(PlayerInteractEntityEvent e) {
+        if (e.isCancelled()) return;
+        if (!checkPower(e.getPlayer().getUniqueId(), Power.PICK_UP)) return;
+        if (!(e.getRightClicked() instanceof Player carried)) return;
+        e.getPlayer().addPassenger(carried);
+        e.getPlayer().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You picked up " + carried.getName() + ChatColor.GREEN + "!");
+        carried.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You were picked up by " + e.getPlayer().getName() + ChatColor.RED + "!");
     }
 
     void reloadPlugin() {

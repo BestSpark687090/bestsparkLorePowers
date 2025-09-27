@@ -15,7 +15,7 @@ public enum Power {
     PIGLIN_AID("Piglin Aid"),
     ANKLE_BITER("Ankle Biter"),
     FIRE_BREATH("Fire Breath"),
-    //PICK_UP("Pick-Me-Up");
+    PICK_UP("Pick-Me-Up"),
     //DRAGON_FORM_WEAPON_BLOCK("Dragon Form Weapon Block"),
     //DRAGON_FORM_FIRE_BUFF("Dragon Form Fire Buff"),
     //DRAGON_FORM_SPIKES("Dragon Form Spikes"),
