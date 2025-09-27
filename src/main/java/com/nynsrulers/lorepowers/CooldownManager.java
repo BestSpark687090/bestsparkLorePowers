@@ -20,11 +20,18 @@ public class CooldownManager {
 
     public void addCooldown(UUID player, Power power, Long duration) {
         activeCooldowns.add(new CooldownKey(player, power));
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            activeCooldowns.remove(new CooldownKey(player, power));
-        }, duration);
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> removeCooldown(player, power), duration);
+    }
+    public void removeCooldown(UUID player, Power power) {
+        activeCooldowns.remove(new CooldownKey(player, power));
     }
     public boolean checkCooldown(UUID player, Power power) {
         return activeCooldowns.contains(new CooldownKey(player, power));
+    }
+    public void removeAllCooldowns() {
+        activeCooldowns.clear();
+    }
+    public void removePlayerCooldowns(UUID player) {
+        activeCooldowns.removeIf(cooldownKey -> cooldownKey.player().equals(player));
     }
 }

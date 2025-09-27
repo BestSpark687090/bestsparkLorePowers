@@ -30,6 +30,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(this, this);
         CoreTools.getInstance().setPlugin(this);
         TimedEffectManager.getInstance().setPlugin(this);
+        CooldownManager.getInstance().setPlugin(this);
         getCommand("lorepowers").setExecutor(new ManageCMD(this));
         getCommand("lorepowers").setTabCompleter(new ManageTabCompleter());
         getCommand("dragonform").setExecutor(new DragonFormCMD(this));
@@ -347,15 +348,18 @@ public final class LorePowers extends JavaPlugin implements Listener {
             if (player.getInventory().getItemInMainHand().getType() == Material.AIR && cooldown.checkCooldown(player.getUniqueId(), Power.FOX_MAGIC)) {
                 cooldown.addCooldown(player.getUniqueId(), Power.FOX_MAGIC, 600L);
                 player.setVelocity(new Vector(0, 32, 0));
+                player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You pounced on " + e.getEntity().getName() + ChatColor.GREEN + "!");
                 getServer().getScheduler().runTaskLater(this, () -> {
-                    for (Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), 1.5, 1.5, 1.5)) {
+                    for (Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), 2, 2, 2)) {
                         if (!(entity instanceof LivingEntity)) continue;
                         if (entity.equals(player)) continue;
                         ((LivingEntity) entity).damage(6, player);
                         if (entity instanceof Player) {
-                            entity.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You were pounced on by " + e.getDamager().getName() + ChatColor.RED + "!");
+                            entity.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You were pounced on by " + player.getName() + ChatColor.RED + "!");
                         }
-                        e.getDamager().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You pounced on " + e.getEntity().getName() + ChatColor.GREEN + "!");
+                        if (!entity.equals(e.getEntity())) {
+                            player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You also hit " + entity.getName() + ChatColor.GREEN + "!");
+                        }
                     }
                 }, 20L);
             }
@@ -365,7 +369,11 @@ public final class LorePowers extends JavaPlugin implements Listener {
     void reloadPlugin() {
         reloadConfig();
         CoreTools.getInstance().setPlugin(this);
+        TimedEffectManager.getInstance().setPlugin(this);
+        CooldownManager.getInstance().setPlugin(this);
         CoreTools.getInstance().checkForUpdates();
+        TimedEffectManager.getInstance().stopAll();
+        CooldownManager.getInstance().removeAllCooldowns();
         for (Player player : getServer().getOnlinePlayers()) {
             // checks to make sure powers are valid!
             for (String power : getConfig().getStringList("PowerLinks." + player.getUniqueId())) {
