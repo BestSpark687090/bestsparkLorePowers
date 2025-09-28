@@ -375,7 +375,20 @@ public final class LorePowers extends JavaPlugin implements Listener {
         if (!(e.getRightClicked() instanceof Player carried)) return;
         e.getPlayer().addPassenger(carried);
         e.getPlayer().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You picked up " + carried.getName() + ChatColor.GREEN + "!");
-        carried.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You were picked up by " + e.getPlayer().getName() + ChatColor.RED + "!");
+        carried.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You were picked up by " + e.getPlayer().getName() + ChatColor.GREEN + "!");
+    }
+
+    @EventHandler
+    public void onSneak_PickUp(PlayerToggleSneakEvent e) {
+        if (e.isCancelled()) return;
+        if (!checkPower(e.getPlayer().getUniqueId(), Power.PICK_UP)) return;
+        if (!e.isSneaking()) return;
+        if (e.getPlayer().getPassengers().isEmpty()) return;
+        for (Entity passenger : e.getPlayer().getPassengers()) {
+            if (!(passenger instanceof Player)) continue;
+            e.getPlayer().removePassenger(passenger);
+            passenger.setVelocity(new Vector(0, 0.5, 0));
+        }
     }
 
     void reloadPlugin() {
