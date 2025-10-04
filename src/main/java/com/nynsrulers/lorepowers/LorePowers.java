@@ -391,6 +391,15 @@ public final class LorePowers extends JavaPlugin implements Listener {
         }
     }
 
+    @EventHandler
+    public void onEat_PotatoRuler(PlayerItemConsumeEvent e) {
+        if (e.getItem().getType() != Material.BAKED_POTATO) return;
+        if (!checkPower(e.getPlayer().getUniqueId(), Power.POTATO_RULER)) return;
+        int foodLevel = e.getPlayer().getFoodLevel() + 3; // 3 + the 5 from the baked potato itself (8 total)
+        if (foodLevel > 20) foodLevel = 20;
+        e.getPlayer().setFoodLevel(foodLevel);
+    }
+
     void reloadPlugin() {
         reloadConfig();
         CoreTools.getInstance().setPlugin(this);
@@ -415,6 +424,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
     public void powerEditCallback(UUID playerUUID) {
         Player player = getServer().getPlayer(playerUUID);
         // potion effect management
+        // todo: make this a switch statement if possible
         if (checkPower(playerUUID, Power.SPEED_MINE)) {
             if (player != null) {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, Integer.MAX_VALUE, 2, true, true, true));
@@ -478,6 +488,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
         }
         if (player != null) {
             // scale management
+            // todo: make this a switch statement if possible
             if (checkPower(playerUUID, Power.BEE_FLIGHT)) {
                 player.getAttribute(Attribute.SCALE).setBaseValue(0.3);
             } else if (checkPower(playerUUID, Power.VILLAGERS_RESPECT)) {
@@ -504,6 +515,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
                 }
             }
             // health management
+            // todo: make this a switch statement if possible
             if (checkPower(playerUUID, Power.BEE_FLIGHT)) {
                 player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(16);
             } else if (checkPower(playerUUID, Power.FOX_MAGIC)) {
@@ -514,6 +526,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
                 player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20);
             }
             // timed effect management
+            // todo: make this a switch statement if possible
             if (checkPower(playerUUID, Power.FOX_MAGIC)) {
                 TimedEffectManager.getInstance().startTimedPower(player);
             } else {
