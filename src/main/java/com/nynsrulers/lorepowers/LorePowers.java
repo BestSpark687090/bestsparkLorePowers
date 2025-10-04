@@ -46,6 +46,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         TimedEffectManager.getInstance().stopAll();
+        CooldownManager.getInstance().removeAllCooldowns();
     }
 
     public boolean checkPower(UUID playerUUID, Power power) {
@@ -73,6 +74,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
     @EventHandler
     public void onLeave(PlayerQuitEvent e) {
         TimedEffectManager.getInstance().stopTimedPower(e.getPlayer());
+        CooldownManager.getInstance().removePlayerCooldowns(e.getPlayer().getUniqueId());
     }
 
     @EventHandler
@@ -112,8 +114,35 @@ public final class LorePowers extends JavaPlugin implements Listener {
     @EventHandler
     public void onDamage_BeeFlight(EntityDamageEvent e) {
         if (e.isCancelled()) return;
-        if (e.getEntity() instanceof Player && checkPower(e.getEntity().getUniqueId(), Power.BEE_FLIGHT)) {
-            ((Player) e.getEntity()).setFlying(false);
+        if (!(e.getEntity() instanceof Player player) || !checkPower(player.getUniqueId(), Power.BEE_FLIGHT)) return;
+        if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) return;
+        if (!player.isFlying()) return;
+        player.setFlying(false);
+        player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You were damaged, and have stopped flying with bee wings.");
+        CooldownManager.getInstance().addCooldown(player.getUniqueId(), Power.BEE_FLIGHT, 300L);
+    }
+    @EventHandler
+    public void onToggleFlight_BeeFlight(PlayerToggleFlightEvent e) {
+        if (e.isCancelled()) return;
+        if (!checkPower(e.getPlayer().getUniqueId(), Power.BEE_FLIGHT)) return;
+        if (e.getPlayer().getGameMode() == GameMode.CREATIVE || e.getPlayer().getGameMode() == GameMode.SPECTATOR) return;
+        if (e.isFlying()) {
+            if (CooldownManager.getInstance().checkCooldown(e.getPlayer().getUniqueId(), Power.BEE_FLIGHT)) {
+                e.setCancelled(true);
+                e.getPlayer().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You are too tired to fly right now.");
+                return;
+            }
+            e.getPlayer().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You are now flying with bee wings (for up to 30 seconds)!");
+            getServer().getScheduler().runTaskLater(this, () -> {
+                if (e.getPlayer().isFlying() && e.getPlayer().getGameMode() != GameMode.CREATIVE && e.getPlayer().getGameMode() != GameMode.SPECTATOR) {
+                    e.getPlayer().setFlying(false);
+                    e.getPlayer().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have stopped flying with bee wings!");
+                    CooldownManager.getInstance().addCooldown(e.getPlayer().getUniqueId(), Power.BEE_FLIGHT, 300L);
+                }
+            }, 600L);
+        } else {
+            e.getPlayer().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have stopped flying with bee wings!");
+            CooldownManager.getInstance().addCooldown(e.getPlayer().getUniqueId(), Power.BEE_FLIGHT, 300L);
         }
     }
 
@@ -409,9 +438,8 @@ public final class LorePowers extends JavaPlugin implements Listener {
     public void onHarvest_PotatoRuler(BlockBreakEvent e) {
         if (e.getBlock().getType() != Material.POTATOES) return;
         if (!checkPower(e.getPlayer().getUniqueId(), Power.POTATO_RULER)) return;
-        Block block = e.getBlock();
-        if (block.getBlockData() instanceof Ageable a && a.getAge() >= a.getMaximumAge()) {
-            block.getWorld().dropItemNaturally(block.getLocation(), new ItemStack(Material.POTATO));
+        if (e.getBlock().getBlockData() instanceof Ageable a && a.getAge() >= a.getMaximumAge()) {
+            e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(), new ItemStack(Material.POTATO));
         }
     }
 
@@ -522,7 +550,6 @@ public final class LorePowers extends JavaPlugin implements Listener {
             // flight management
             if (checkPower(playerUUID, Power.BEE_FLIGHT)) {
                 player.setAllowFlight(true);
-                player.setFlying(true);
             } else {
                 if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR) {
                     player.setAllowFlight(false);
