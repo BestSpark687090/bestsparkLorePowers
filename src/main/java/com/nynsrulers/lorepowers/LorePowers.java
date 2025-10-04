@@ -4,11 +4,13 @@ import java.util.*;
 
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.Event.Result;
-import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
@@ -377,7 +379,6 @@ public final class LorePowers extends JavaPlugin implements Listener {
         e.getPlayer().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You picked up " + carried.getName() + ChatColor.GREEN + "!");
         carried.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You were picked up by " + e.getPlayer().getName() + ChatColor.GREEN + "!");
     }
-
     @EventHandler
     public void onSneak_PickUp(PlayerToggleSneakEvent e) {
         if (e.isCancelled()) return;
@@ -393,11 +394,25 @@ public final class LorePowers extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onEat_PotatoRuler(PlayerItemConsumeEvent e) {
-        if (e.getItem().getType() != Material.BAKED_POTATO) return;
+        if (e.isCancelled()) return;
         if (!checkPower(e.getPlayer().getUniqueId(), Power.POTATO_RULER)) return;
-        int foodLevel = e.getPlayer().getFoodLevel() + 3; // 3 + the 5 from the baked potato itself (8 total)
-        if (foodLevel > 20) foodLevel = 20;
-        e.getPlayer().setFoodLevel(foodLevel);
+        if (e.getItem().getType() != Material.BAKED_POTATO) return;
+        getServer().getScheduler().runTaskLater(this, () -> {
+            int foodLevel = e.getPlayer().getFoodLevel() + 3; // 3 + the 5 from the baked potato itself (8 total)
+            if (foodLevel > 20) foodLevel = 20;
+            float saturationLevel = e.getPlayer().getSaturation() + 0.4F; // 0.4 + 1.2 from the baked potato itself (1.6 total)
+            e.getPlayer().setFoodLevel(foodLevel);
+            e.getPlayer().setSaturation(saturationLevel);
+        }, 5L);
+    }
+    @EventHandler
+    public void onHarvest_PotatoRuler(BlockBreakEvent e) {
+        if (e.getBlock().getType() != Material.POTATOES) return;
+        if (!checkPower(e.getPlayer().getUniqueId(), Power.POTATO_RULER)) return;
+        Block block = e.getBlock();
+        if (block.getBlockData() instanceof Ageable a && a.getAge() >= a.getMaximumAge()) {
+            block.getWorld().dropItemNaturally(block.getLocation(), new ItemStack(Material.POTATO));
+        }
     }
 
     void reloadPlugin() {
