@@ -20,9 +20,11 @@ import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 public final class LorePowers extends JavaPlugin implements Listener {
+    public HashMap<UUID, BukkitTask> beeFlightTasks = new HashMap<>();
     public List<UUID> dragonFormActive = new ArrayList<>();
     public boolean libsDisguisesInstalled = false;
 
@@ -120,6 +122,10 @@ public final class LorePowers extends JavaPlugin implements Listener {
         player.setFlying(false);
         player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You were damaged, and have stopped flying with bee wings.");
         CooldownManager.getInstance().addCooldown(player.getUniqueId(), Power.BEE_FLIGHT, 300L);
+        if (beeFlightTasks.containsKey(player.getUniqueId())) {
+            beeFlightTasks.get(player.getUniqueId()).cancel();
+            beeFlightTasks.remove(player.getUniqueId());
+        }
     }
     @EventHandler
     public void onToggleFlight_BeeFlight(PlayerToggleFlightEvent e) {
@@ -133,16 +139,21 @@ public final class LorePowers extends JavaPlugin implements Listener {
                 return;
             }
             e.getPlayer().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You are now flying with bee wings (for up to 30 seconds)!");
-            getServer().getScheduler().runTaskLater(this, () -> {
+            BukkitTask task = getServer().getScheduler().runTaskLater(this, () -> {
                 if (e.getPlayer().isFlying() && e.getPlayer().getGameMode() != GameMode.CREATIVE && e.getPlayer().getGameMode() != GameMode.SPECTATOR) {
                     e.getPlayer().setFlying(false);
                     e.getPlayer().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have stopped flying with bee wings!");
                     CooldownManager.getInstance().addCooldown(e.getPlayer().getUniqueId(), Power.BEE_FLIGHT, 300L);
                 }
             }, 600L);
+            beeFlightTasks.put(e.getPlayer().getUniqueId(), task);
         } else {
             e.getPlayer().sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You have stopped flying with bee wings!");
             CooldownManager.getInstance().addCooldown(e.getPlayer().getUniqueId(), Power.BEE_FLIGHT, 300L);
+            if (beeFlightTasks.containsKey(e.getPlayer().getUniqueId())) {
+                beeFlightTasks.get(e.getPlayer().getUniqueId()).cancel();
+                beeFlightTasks.remove(e.getPlayer().getUniqueId());
+            }
         }
     }
 
