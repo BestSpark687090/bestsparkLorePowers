@@ -544,17 +544,18 @@ public final class LorePowers extends JavaPlugin implements Listener {
         if (checkPower(playerUUID, Power.BESTSPARKS_IDEA)) {
             if (player != null) {
                 // I don't want any potion effects...
-                player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 2, 0, true, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 1, 0, true, true, true));
                 // sike
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 0, 0, true, true, true));
             }
             }else{
                 if (player != null) {
-                    boolean hasAllEffects = player.hasPotionEffect(PotionEffectType.JUMP_BOOST) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.JUMP_BOOST)).getAmplifier() == 0 &&
-                            player.hasPotionEffect(PotionEffectType.SLOW_FALLING) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.SLOW_FALLING)).getAmplifier() == 0;
+                    boolean hasAllEffects = player.hasPotionEffect(PotionEffectType.STRENGTH) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.STRENGTH)).getAmplifier() == 0 &&
+                            player.hasPotionEffect(PotionEffectType.SLOWNESS) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.SLOWNESS)).getAmplifier() == 0;
     
                     if (hasAllEffects) {
-                        player.removePotionEffect(PotionEffectType.JUMP_BOOST);
-                        player.removePotionEffect(PotionEffectType.SLOW_FALLING);
+                        player.removePotionEffect(PotionEffectType.STRENGTH);
+                        player.removePotionEffect(PotionEffectType.SLOWNESS);
                         player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "Can't believe bro got debuffed :/");
                     }
                 }
@@ -568,14 +569,14 @@ public final class LorePowers extends JavaPlugin implements Listener {
                 player.getAttribute(Attribute.SCALE).setBaseValue(0.5);
             } else if (checkPower(playerUUID, Power.ANKLE_BITER)) {
                 player.getAttribute(Attribute.SCALE).setBaseValue(0.75);
+            } else if (checkPower(playerUUID, Power.BESTSPARKS_IDEA)) {
+                player.getAttribute(Attribute.SCALE).setBaseValue(0.9);
             } else if (checkPower(playerUUID, Power.DRAGON_FORM)) {
                 if (player.getName().equals(".XxdeathflamexX1")) {
                     player.getAttribute(Attribute.SCALE).setBaseValue(2.0);
                 } else {
                     player.getAttribute(Attribute.SCALE).setBaseValue(1.5);
                 }
-            } else if (checkPower(playerUUID, Power.BESTSPARKS_IDEA)) {
-                player.getAttribute(Attribute.SCALE).setBaseValue(0.9);                
             } else {
                 player.getAttribute(Attribute.SCALE).setBaseValue(1.0);
             }
