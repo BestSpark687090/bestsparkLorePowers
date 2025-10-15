@@ -3,7 +3,7 @@
 # Prefix
 # This appears in front of all messages sent by the plugin.
 # Supports color codes, guide: https://wiki.ess3.net/mc
-Prefix: '&7[&dLorePowers&7]'
+Prefix: '&7[&dLore&7]'
 
 # Power Links
 # This section allows linking powers to players.
