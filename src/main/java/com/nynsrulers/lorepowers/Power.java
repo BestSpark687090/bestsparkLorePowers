@@ -21,7 +21,8 @@ public enum Power {
     //DRAGON_FORM_SPIKES("Dragon Form Spikes"),
     VILLAGERS_RESPECT("Villager's Respect"),
     FOX_MAGIC("Fox's Magic"),
-    POTATO_RULER("Potato Ruler"),;
+    POTATO_RULER("Potato Ruler"),
+    BESTSPARKS_IDEA("BestSpark's Idea";
 
     private final String name;
 
