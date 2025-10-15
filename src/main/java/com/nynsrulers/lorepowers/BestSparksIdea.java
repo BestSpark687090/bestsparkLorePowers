@@ -25,24 +25,24 @@ public class BestSparksIdea implements CommandExecutor {
        sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "This power is not enabled, as Lib's Disguises is not installed!");
        return false;
    }
-//    Player player = (Player) sender;
-//    if (!plugin.checkPower(player.getUniqueId(), Power.DRAGON_FORM)) {
-//      sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You do not have this power!.");
-//      if (plugin.dragonFormActive.contains(player.getUniqueId())) {
-//        plugin.dragonFormActive.remove(player.getUniqueId());
-//        DisguiseAPI.undisguiseToAll(player);
-//      }
-//      return false;
-//    }
-//    if (plugin.dragonFormActive.contains(player.getUniqueId())) {
-//      plugin.dragonFormActive.remove(player.getUniqueId());
-//      DisguiseAPI.undisguiseToAll(player);
-//      sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You have returned to a human form!");
-//      return true;
-//    }
-//    DisguiseAPI.disguiseEntity(player, new MobDisguise(DisguiseType.ENDER_DRAGON));
-//    plugin.dragonFormActive.add(player.getUniqueId());
-//    sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You have transformed into a Dragon form!");
-//    return true;
+   Player player = (Player) sender;
+   if (!plugin.checkPower(player.getUniqueId(), Power.BESTSPARKS_IDEA)) {
+     sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "You do not have this power!.");
+     if (plugin.dragonFormActive.contains(player.getUniqueId())) {
+       plugin.dragonFormActive.remove(player.getUniqueId());
+       DisguiseAPI.undisguiseToAll(player);
+     }
+     return false;
+   }
+   if (plugin.sparksIdeaActive.contains(player.getUniqueId())) {
+     plugin.sparksIdeaActive.remove(player.getUniqueId());
+     DisguiseAPI.undisguiseToAll(player);
+     sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You have returned to a human form!");
+     return true;
+   }
+   DisguiseAPI.disguiseEntity(player, new MobDisguise(DisguiseType.CREEPER));
+   plugin.dragonFormActive.add(player.getUniqueId());
+   sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.GREEN + "You have transformed into a Dragon form!");
+   return true;
   }
 }
