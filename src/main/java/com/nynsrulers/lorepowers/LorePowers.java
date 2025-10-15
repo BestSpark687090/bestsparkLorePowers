@@ -39,6 +39,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
         getCommand("lorepowers").setExecutor(new ManageCMD(this));
         getCommand("lorepowers").setTabCompleter(new ManageTabCompleter());
         getCommand("dragonform").setExecutor(new DragonFormCMD(this));
+        getCommand("sparksidea").setExecutor(new BestSparksIdea(this));
         if (getServer().getPluginManager().getPlugin("LibsDisguises") != null) {
             libsDisguisesInstalled = true;
         }
@@ -540,6 +541,24 @@ public final class LorePowers extends JavaPlugin implements Listener {
                 }
             }
         }
+        if (checkPower(playerUUID, Power.BESTSPARKS_IDEA)) {
+            if (player != null) {
+                // I don't want any potion effects...
+                player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 2, 0, true, true, true));
+                // sike
+            }
+            }else{
+                if (player != null) {
+                    boolean hasAllEffects = player.hasPotionEffect(PotionEffectType.JUMP_BOOST) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.JUMP_BOOST)).getAmplifier() == 0 &&
+                            player.hasPotionEffect(PotionEffectType.SLOW_FALLING) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.SLOW_FALLING)).getAmplifier() == 0;
+    
+                    if (hasAllEffects) {
+                        player.removePotionEffect(PotionEffectType.JUMP_BOOST);
+                        player.removePotionEffect(PotionEffectType.SLOW_FALLING);
+                        player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "Can't believe bro got debuffed :/");
+                    }
+                }
+            }
         if (player != null) {
             // scale management
             // todo: make this a switch statement if possible
@@ -555,6 +574,8 @@ public final class LorePowers extends JavaPlugin implements Listener {
                 } else {
                     player.getAttribute(Attribute.SCALE).setBaseValue(1.5);
                 }
+            } else if (checkPower(playerUUID, Power.BESTSPARKS_IDEA)) {
+                player.getAttribute(Attribute.SCALE).setBaseValue(0.9);                
             } else {
                 player.getAttribute(Attribute.SCALE).setBaseValue(1.0);
             }
