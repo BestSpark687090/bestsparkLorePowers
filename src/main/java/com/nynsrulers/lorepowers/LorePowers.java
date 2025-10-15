@@ -4,7 +4,6 @@ import java.util.*;
 
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -26,6 +25,7 @@ import org.bukkit.util.Vector;
 public final class LorePowers extends JavaPlugin implements Listener {
     public HashMap<UUID, BukkitTask> beeFlightTasks = new HashMap<>();
     public List<UUID> dragonFormActive = new ArrayList<>();
+    public List<UUID> sparksIdeaActive = new ArrayList<>();
     public boolean libsDisguisesInstalled = false;
 
     @Override
@@ -550,7 +550,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
             }
             }else{
                 if (player != null) {
-                    boolean hasAllEffects = player.hasPotionEffect(PotionEffectType.STRENGTH) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.STRENGTH)).getAmplifier() == 0 &&
+                    boolean hasAllEffects = player.hasPotionEffect(PotionEffectType.STRENGTH) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.STRENGTH)).getAmplifier() == 1 &&
                             player.hasPotionEffect(PotionEffectType.SLOWNESS) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.SLOWNESS)).getAmplifier() == 0;
     
                     if (hasAllEffects) {
