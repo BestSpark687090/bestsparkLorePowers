@@ -17,3 +17,9 @@ commands:
     description: Become a dragon, and gain the advanced powers with it.
     aliases:
       - dform
+  bestsparksidea:
+    description: BestSpark687090's best attempt at making a power.
+    aliases:
+      - bestspark
+      - bspark
+      - sparkform
