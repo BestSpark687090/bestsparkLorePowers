@@ -12,6 +12,7 @@ public class BestSparksIdea implements CommandExecutor {
   public BestSparksIdea(LorePowers plugin) {
     this.plugin = plugin;
   }
+  /// PLEASE NOTE I COPIED OFF OF THE DRAGON FORM COMMAND IF SOME OF THIS DOESNT WORK THEN MY B
   @Override
   public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
     // sender.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "This command has been forcibly disabled, as it breaks things and is not ready.");
