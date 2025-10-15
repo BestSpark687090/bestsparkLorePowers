@@ -22,7 +22,7 @@ public enum Power {
     VILLAGERS_RESPECT("Villager's Respect"),
     FOX_MAGIC("Fox's Magic"),
     POTATO_RULER("Potato Ruler"),
-    BESTSPARKS_IDEA("BestSpark's Idea";
+    BESTSPARKS_IDEA("BestSpark's Idea");
 
     private final String name;
 
