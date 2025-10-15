@@ -39,6 +39,7 @@ public final class LorePowers extends JavaPlugin implements Listener {
         getCommand("lorepowers").setExecutor(new ManageCMD(this));
         getCommand("lorepowers").setTabCompleter(new ManageTabCompleter());
         getCommand("dragonform").setExecutor(new DragonFormCMD(this));
+        getCommand("sparksidea").setExecutor(new BestSparksIdea(this));
         if (getServer().getPluginManager().getPlugin("LibsDisguises") != null) {
             libsDisguisesInstalled = true;
         }
@@ -540,6 +541,25 @@ public final class LorePowers extends JavaPlugin implements Listener {
                 }
             }
         }
+        if (checkPower(playerUUID, Power.BESTSPARKS_IDEA)) {
+            if (player != null) {
+                // I don't want any potion effects...
+                player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 1, 0, true, true, true));
+                // sike
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 0, 0, true, true, true));
+            }
+            }else{
+                if (player != null) {
+                    boolean hasAllEffects = player.hasPotionEffect(PotionEffectType.STRENGTH) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.STRENGTH)).getAmplifier() == 0 &&
+                            player.hasPotionEffect(PotionEffectType.SLOWNESS) && Objects.requireNonNull(player.getPotionEffect(PotionEffectType.SLOWNESS)).getAmplifier() == 0;
+    
+                    if (hasAllEffects) {
+                        player.removePotionEffect(PotionEffectType.STRENGTH);
+                        player.removePotionEffect(PotionEffectType.SLOWNESS);
+                        player.sendMessage(CoreTools.getInstance().getPrefix() + ChatColor.RED + "Can't believe bro got debuffed :/");
+                    }
+                }
+            }
         if (player != null) {
             // scale management
             // todo: make this a switch statement if possible
@@ -549,6 +569,8 @@ public final class LorePowers extends JavaPlugin implements Listener {
                 player.getAttribute(Attribute.SCALE).setBaseValue(0.5);
             } else if (checkPower(playerUUID, Power.ANKLE_BITER)) {
                 player.getAttribute(Attribute.SCALE).setBaseValue(0.75);
+            } else if (checkPower(playerUUID, Power.BESTSPARKS_IDEA)) {
+                player.getAttribute(Attribute.SCALE).setBaseValue(0.9);
             } else if (checkPower(playerUUID, Power.DRAGON_FORM)) {
                 if (player.getName().equals(".XxdeathflamexX1")) {
                     player.getAttribute(Attribute.SCALE).setBaseValue(2.0);
